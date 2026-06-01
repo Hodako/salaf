@@ -98,8 +98,13 @@ const Footer = async () => {
                     <p className="text-gray-950/75 text-[13px] text-center font-medium">
                         &copy; {currentYear} Salaf. All rights reserved
                     </p>
-                    <p className="text-gray-950/70 text-[13px] text-center flex items-center justify-center gap-1">
-                        Developed with <Heart className="w-3.5 h-3.5 text-red-500 fill-red-500" /> by <Link href="https://farhansadiq.dev" target="_blank" className="text-gray-950 font-black hover:text-black hover:underline hover:cursor-pointer transition-colors">Farhan Sadiq</Link>
+                    <p className="text-gray-950/70 text-[13px] text-center flex items-center justify-center gap-1 flex-wrap">
+                        <span>Developed with</span>
+                        <Heart className="w-3.5 h-3.5 text-red-500 fill-red-500 inline-block mx-0.5" />
+                        <span>by</span>
+                        <Link href="https://farhansadiq.dev" target="_blank" className="text-gray-950 font-black hover:text-black hover:underline hover:cursor-pointer transition-colors">Farhan Sadiq</Link>
+                        <span className="mx-1 text-gray-950/40">|</span>
+                        <span className="font-semibold text-gray-950">Special Thanks to Mr Azizul Hakim</span>
                     </p>
                 </div>
             </div>

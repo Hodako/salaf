@@ -474,63 +474,68 @@ export function ProductView({ product, reviewStats }: ProductViewProps) {
 
             {/* Sticky Bottom Buy/Cart Mobile Overlay */}
             <div className={cn(
-                "lg:hidden fixed bottom-0 left-0 right-0 z-[90] gold-gradient gold-bevel text-gray-950 px-4 py-3.5 transition-all duration-500 ease-in-out transform flex items-center justify-between gap-3 shadow-[0_-8px_30px_rgba(172,135,23,0.45)]",
+                "lg:hidden fixed bottom-0 left-0 right-0 z-[90] gold-gradient gold-bevel text-gray-950 px-4 transition-all duration-500 ease-in-out transform shadow-[0_-8px_30px_rgba(172,135,23,0.45)]",
                 isOverlayVisible ? "translate-y-0 opacity-100" : "translate-y-full opacity-0 pointer-events-none"
             )}
-            style={{ paddingBottom: "env(safe-area-inset-bottom, 12px)" }}
+            style={{ 
+                paddingTop: "14px",
+                paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 16px)"
+            }}
             >
-                {/* Product Thumbnail & Highly Structured Metadata Info */}
-                <div className="flex items-center gap-2.5 max-w-[50%] shrink-0">
-                    <div className="w-11 h-11 relative bg-white rounded-lg overflow-hidden border border-black/10 shrink-0 shadow-xs">
-                        <Image
-                            src={activeImg}
-                            alt=""
-                            fill
-                            className="object-contain p-1"
-                        />
-                    </div>
-                    <div className="flex flex-col min-w-0">
-                        <span className="text-[11px] font-black text-gray-950 leading-tight truncate uppercase font-heading tracking-wide">
-                            {product.name}
-                        </span>
-                        <div className="flex items-center gap-2 mt-1 leading-none text-gray-800">
-                            <span className="text-[8px] font-extrabold uppercase tracking-widest shrink-0 bg-black/5 px-1.5 py-0.5 rounded-sm border border-black/5">
-                                {activeVariation?.volume}{activeVariation?.volumeUnit}
+                <div className="flex items-center justify-between gap-3 w-full">
+                    {/* Product Thumbnail & Highly Structured Metadata Info */}
+                    <div className="flex items-center gap-2.5 max-w-[50%] shrink-0">
+                        <div className="w-11 h-11 relative bg-white rounded-lg overflow-hidden border border-black/10 shrink-0 shadow-xs">
+                            <Image
+                                src={activeImg}
+                                alt=""
+                                fill
+                                className="object-cover scale-[1.35]"
+                            />
+                        </div>
+                        <div className="flex flex-col min-w-0">
+                            <span className="text-[11px] font-black text-gray-950 leading-tight truncate uppercase font-heading tracking-wide">
+                                {product.name}
                             </span>
-                            <span className="text-gray-800/40 text-[9px] shrink-0">|</span>
-                            <span className="text-[13px] font-black text-gray-950 shrink-0">
-                                ৳ {price.toLocaleString()}
-                            </span>
+                            <div className="flex items-center gap-2 mt-1 leading-none text-gray-800">
+                                <span className="text-[8px] font-extrabold uppercase tracking-widest shrink-0 bg-black/5 px-1.5 py-0.5 rounded-sm border border-black/5">
+                                    {activeVariation?.volume}{activeVariation?.volumeUnit}
+                                </span>
+                                <span className="text-gray-800/40 text-[9px] shrink-0">|</span>
+                                <span className="text-[13px] font-black text-gray-950 shrink-0">
+                                    ৳ {price.toLocaleString()}
+                                </span>
+                            </div>
                         </div>
                     </div>
-                </div>
 
-                {/* Actions: Add to Cart icon button & Buy Capsule (Transparent Backgrounds) */}
-                <div className="flex items-center gap-2 flex-1 justify-end">
-                    <button
-                        onClick={handleAddToCart}
-                        disabled={isOutOfStock}
-                        className={cn(
-                            "w-10 h-10 rounded-full flex items-center justify-center shrink-0 border transition-all duration-300 cursor-pointer shadow-xs",
-                            isOutOfStock 
-                                ? "bg-gray-300/30 border-gray-400/25 text-gray-500 cursor-not-allowed"
-                                : isAlreadyInCart
-                                    ? "bg-green-700/20 border-green-600/30 text-green-800"
-                                    : "bg-black/10 border-black/10 text-gray-950 hover:bg-black/15 active:scale-95"
-                        )}
-                        title="Add to Cart"
-                    >
-                        <ShoppingBag className="w-4 h-4" />
-                    </button>
-
-                    {!isOutOfStock && (
+                    {/* Actions: Add to Cart icon button & Buy Capsule (Transparent Backgrounds) */}
+                    <div className="flex items-center gap-2 flex-1 justify-end">
                         <button
-                            onClick={handleBuyNow}
-                            className="h-10 px-5 bg-black/10 hover:bg-black/15 active:scale-[0.98] text-gray-950 font-black text-[10px] uppercase tracking-widest rounded-full transition-all duration-300 flex-1 max-w-[125px] flex items-center justify-center cursor-pointer shadow-xs border border-black/10"
+                            onClick={handleAddToCart}
+                            disabled={isOutOfStock}
+                            className={cn(
+                                "w-10 h-10 rounded-full flex items-center justify-center shrink-0 border transition-all duration-300 cursor-pointer shadow-xs",
+                                isOutOfStock 
+                                    ? "bg-gray-300/30 border-gray-400/25 text-gray-500 cursor-not-allowed"
+                                    : isAlreadyInCart
+                                        ? "bg-green-700/20 border-green-600/30 text-green-800"
+                                        : "bg-black/10 border-black/10 text-gray-950 hover:bg-black/15 active:scale-95"
+                            )}
+                            title="Add to Cart"
                         >
-                            ⚡ Buy
+                            <ShoppingBag className="w-4 h-4" />
                         </button>
-                    )}
+
+                        {!isOutOfStock && (
+                            <button
+                                onClick={handleBuyNow}
+                                className="h-10 px-5 bg-black/10 hover:bg-black/15 active:scale-[0.98] text-gray-950 font-black text-[10px] uppercase tracking-widest rounded-full transition-all duration-300 flex-1 max-w-[125px] flex items-center justify-center cursor-pointer shadow-xs border border-black/10"
+                            >
+                                ⚡ Buy
+                            </button>
+                        )}
+                    </div>
                 </div>
             </div>
 

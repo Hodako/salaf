@@ -213,17 +213,37 @@ const Navbar = () => {
                         </div>
                         {searchResults.length > 0 && (
                             <div className="container mx-auto px-6 pb-6">
-                                <div className="flex flex-col gap-1 border-t border-black/10 pt-4 max-w-xl">
-                                    {searchResults.map((product) => (
-                                        <button
-                                            key={product._id}
-                                            onClick={() => handleSearchSubmit(product.name)}
-                                            className="flex items-center gap-3 px-4 py-2 rounded-lg hover:bg-white/20 text-gray-950 hover:text-white font-medium text-sm text-left w-full cursor-pointer transition-colors"
-                                        >
-                                            <SearchIcon className="w-4 h-4 text-gray-950/60 shrink-0" />
-                                            <span>{product.name}</span>
-                                        </button>
-                                    ))}
+                                <div className="flex flex-col gap-2 border-t border-black/10 pt-4 max-w-xl">
+                                    {searchResults.map((product) => {
+                                        const price = product.variations?.[0]?.salePrice || product.variations?.[0]?.basePrice || 0;
+                                        return (
+                                            <Link
+                                                key={product._id}
+                                                href={`/product/${product.slug}`}
+                                                prefetch={true}
+                                                onClick={() => {
+                                                    setIsSearchOpen(false);
+                                                    setSearchQuery("");
+                                                }}
+                                                className="flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-white/25 text-gray-950 hover:text-white font-medium text-sm text-left w-full cursor-pointer transition-all duration-300 shadow-xs hover:shadow-md bg-white/10"
+                                            >
+                                                <div className="relative w-10 h-10 rounded-lg overflow-hidden shrink-0 border border-black/5 bg-white">
+                                                    <Image
+                                                        src={product.featuredImage || (product.images && product.images[0]) || "/nav-logo.png"}
+                                                        alt={product.name}
+                                                        fill
+                                                        className="object-cover"
+                                                    />
+                                                </div>
+                                                <div className="flex flex-col flex-1 min-w-0">
+                                                    <span className="truncate font-bold text-xs uppercase tracking-wide leading-tight">{product.name}</span>
+                                                    <span className="text-[10px] text-gray-950/60 group-hover:text-white/80 mt-0.5">
+                                                        ৳ {price.toLocaleString()}
+                                                    </span>
+                                                </div>
+                                            </Link>
+                                        );
+                                    })}
                                 </div>
                             </div>
                         )}
@@ -375,17 +395,37 @@ const Navbar = () => {
                                         <span>Search for "{searchQuery}"</span>
                                     </button>
 
-                                    {/* Dynamic matching keyword suggestions (YouTube style) */}
-                                    {searchResults.map((product) => (
-                                        <button
-                                            key={product._id}
-                                            onClick={() => handleSearchSubmit(product.name)}
-                                            className="flex items-center gap-3 border-b border-gray-50 py-3 text-sm text-gray-800 hover:text-bprimary-dark hover:bg-gray-50/50 text-left w-full font-sans font-medium cursor-pointer"
-                                        >
-                                            <SearchIcon className="w-4 h-4 text-gray-400 shrink-0" />
-                                            <span>{product.name}</span>
-                                        </button>
-                                    ))}
+                                    {/* Dynamic matching product suggestions */}
+                                    {searchResults.map((product) => {
+                                        const price = product.variations?.[0]?.salePrice || product.variations?.[0]?.basePrice || 0;
+                                        return (
+                                            <Link
+                                                key={product._id}
+                                                href={`/product/${product.slug}`}
+                                                prefetch={true}
+                                                onClick={() => {
+                                                    setIsSearchOpen(false);
+                                                    setSearchQuery("");
+                                                }}
+                                                className="flex items-center gap-3 border-b border-gray-100 py-2.5 text-sm text-gray-800 hover:text-bprimary-dark active:bg-gray-50 text-left w-full font-sans font-medium cursor-pointer transition-all duration-200"
+                                            >
+                                                <div className="relative w-10 h-10 rounded-lg overflow-hidden shrink-0 border border-gray-200 bg-white">
+                                                    <Image
+                                                        src={product.featuredImage || (product.images && product.images[0]) || "/nav-logo.png"}
+                                                        alt={product.name}
+                                                        fill
+                                                        className="object-cover"
+                                                    />
+                                                </div>
+                                                <div className="flex flex-col flex-1 min-w-0">
+                                                    <span className="truncate font-bold text-xs uppercase tracking-wide leading-tight text-gray-900">{product.name}</span>
+                                                    <span className="text-[10px] text-gray-500 mt-0.5 font-semibold">
+                                                        ৳ {price.toLocaleString()}
+                                                    </span>
+                                                </div>
+                                            </Link>
+                                        );
+                                    })}
 
                                     {searchQuery.length >= 2 && !isLoading && searchResults.length === 0 && (
                                         <div className="py-6 text-center text-gray-400 text-sm">
