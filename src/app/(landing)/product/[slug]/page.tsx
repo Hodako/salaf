@@ -57,7 +57,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
   }
 
   // Fetch minimal review stats for initial load
-  const reviewStats = await getReviewStats(product._id as string);
+  const reviewStats = await getReviewStats(product._id as any);
 
   // Fetch Custom Product Template if exists
   let template = null;
