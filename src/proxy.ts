@@ -6,7 +6,7 @@ export function proxy(request: NextRequest) {
     const { pathname } = request.nextUrl;
 
     // We only care about protecting certain routes
-    const isAdminRoute = pathname.startsWith('/admin');
+    const isAdminRoute = pathname.startsWith('/admin') || pathname.startsWith('/whoisadmin');
     const isDashboardRoute = pathname.startsWith('/dashboard');
 
     if (!isAdminRoute && !isDashboardRoute) {
@@ -47,5 +47,5 @@ export function proxy(request: NextRequest) {
 
 // Ensure the proxy/middleware only runs on specific paths to save compute!
 export const config = {
-    matcher: ['/admin/:path*', '/dashboard/:path*'],
+    matcher: ['/admin/:path*', '/dashboard/:path*', '/whoisadmin/:path*'],
 };

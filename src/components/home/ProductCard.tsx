@@ -268,16 +268,20 @@ export const ProductCard = ({
                 ▸ Compact action row at bottom
             ════════════════════════════════════════════════════════════ */}
             <motion.div
-                whileHover={{ y: -2 }}
-                whileTap={{ scale: 0.985 }}
+                whileTap={{ scale: 0.96 }}
                 transition={{ type: "spring", stiffness: 420, damping: 28 }}
-                className="flex lg:hidden flex-col w-full bg-white overflow-hidden border border-[#ebe3d4] relative group cursor-pointer shadow-[0_1px_2px_rgba(41,30,18,0.04)] hover:shadow-[0_6px_18px_rgba(41,30,18,0.12)]"
+                className="flex lg:hidden flex-col w-full bg-white overflow-hidden border border-[#ebe3d4] relative group cursor-pointer shadow-[0_1px_2px_rgba(41,30,18,0.04)] hover:shadow-[0_4px_12px_rgba(41,30,18,0.1)] active:bg-amber-50/40 transition-colors"
             >
-
-                {/* ── Full-bleed Image ── */}
+                {/* Entire Card Absolute Overlay Link for Instant Navigation on Mobile */}
                 <Link
                     href={`/product/${product.slug}`}
                     onClick={handleClick}
+                    className="absolute inset-0 z-10"
+                    aria-label={product.name}
+                />
+
+                {/* ── Full-bleed Image ── */}
+                <div
                     className="relative block w-full overflow-hidden bg-white"
                     style={{ aspectRatio: "1 / 1.06" }}
                 >
@@ -292,7 +296,7 @@ export const ProductCard = ({
 
                     {/* Sale badge — top-left, sharp */}
                     {isOnSale && (
-                        <span className="absolute top-1 left-1 z-10 bg-red-600 text-white text-[8px] font-black uppercase tracking-wider px-1.5 py-0.5 leading-none rounded-sm">
+                        <span className="absolute top-1 left-1 z-20 bg-red-600 text-white text-[8px] font-black uppercase tracking-wider px-1.5 py-0.5 leading-none rounded-sm">
                             SALE
                         </span>
                     )}
@@ -305,23 +309,23 @@ export const ProductCard = ({
                             toggleWishlist(product._id);
                         }}
                         className={cn(
-                            "absolute top-1 right-1 z-10 w-6 h-6 bg-white/92 rounded-full flex items-center justify-center shadow-sm transition-all active:scale-90",
+                            "absolute top-1 right-1 z-20 w-6 h-6 bg-white/92 rounded-full flex items-center justify-center shadow-sm transition-all active:scale-90 cursor-pointer",
                             isWishlisted ? "text-red-500" : "text-gray-500"
                         )}
                     >
                         <Heart className={cn("w-3 h-3", isWishlisted && "fill-current")} />
                     </button>
-                </Link>
+                </div>
 
                 {/* ── Info Block — zero gap from image ── */}
-                <div className="flex flex-col px-1.5 pt-1.5 pb-1.5 gap-1 bg-white transition-colors group-hover:bg-[#fffaf0]">
+                <div className="flex flex-col px-1.5 pt-1.5 pb-1.5 gap-1 bg-white relative z-0">
 
                     {/* Product name */}
-                    <Link href={`/product/${product.slug}`} onClick={handleClick}>
+                    <div>
                         <h3 className="text-[10px] font-semibold text-gray-950 leading-[1.2] line-clamp-2 font-sans min-h-[24px]">
                             {product.name}
                         </h3>
-                    </Link>
+                    </div>
 
                     {/* Price row — Premium 1-line range layout with corner base price */}
                     <div className="relative flex flex-col w-full min-h-[22px] justify-center">
@@ -342,16 +346,16 @@ export const ProductCard = ({
                     </div>
 
                     {/* Action row — Amazon-style: Buy Now + Cart icon */}
-                    <div className="flex gap-1 mt-0.5">
+                    <div className="flex gap-1 mt-0.5 relative z-20">
                         <button
                             onClick={handleQuickBuy}
-                            className="flex-1 h-6 rounded-sm bg-[#d4af37] hover:bg-[#c49d2e] active:bg-[#b68e22] text-white font-black text-[7.5px] uppercase tracking-[0.06em] transition-colors leading-none"
+                            className="flex-1 h-6 rounded-sm bg-[#d4af37] hover:bg-[#c49d2e] active:bg-[#b68e22] text-white font-black text-[7.5px] uppercase tracking-[0.06em] transition-colors leading-none cursor-pointer"
                         >
                             Buy Now
                         </button>
                         <button
                             onClick={handleQuickAdd}
-                            className="w-6 h-6 rounded-sm flex items-center justify-center shrink-0 bg-[#0c0a07] hover:bg-[#2a2117] active:bg-black transition-colors"
+                            className="w-6 h-6 rounded-sm flex items-center justify-center shrink-0 bg-[#0c0a07] hover:bg-[#2a2117] active:bg-black transition-colors cursor-pointer"
                             title="Add to Cart"
                         >
                             <ShoppingCart className="w-2.5 h-2.5 text-white" />

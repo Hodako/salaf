@@ -7,36 +7,51 @@ import { usePathname } from "next/navigation";
  * TawkChat component for integrating Tawk.to live chat.
  * 
  * Handles the script injection and initial configuration.
- * Includes a custom offset for mobile to ensure it doesn't overlap with the BottomNav.
- * Automatically excludes itself from admin routes.
+ * Includes a custom offset for mobile to ensure it doesn't overlap with the bottom of the screen.
+ * Restricts rendering strictly to the home page root ('/').
  */
 export const TawkChat = () => {
     const pathname = usePathname();
-    const isAdminPage = pathname?.startsWith('/admin');
+    const isHomePage = pathname === '/';
 
+    // Route-specific visibility handler
     useEffect(() => {
         const Tawk_API: any = (window as any).Tawk_API || {};
 
-        // If the script is already loaded, just toggle visibility
         if (Tawk_API.hideWidget && Tawk_API.showWidget) {
-            if (isAdminPage) {
-                Tawk_API.hideWidget();
-            } else {
+            if (isHomePage) {
                 Tawk_API.showWidget();
+            } else {
+                Tawk_API.hideWidget();
             }
+        }
+    }, [isHomePage, pathname]);
+
+    // Initial script load & style configuration
+    useEffect(() => {
+        const Tawk_API: any = (window as any).Tawk_API || {};
+        
+        // Avoid duplicate script injection
+        if (document.getElementById("tawk-script")) {
             return;
         }
 
-        // If we are on an admin page and the script isn't loaded yet, don't load it
-        if (isAdminPage) return;
-
-        // --- Initial Load Logic ---
         const Tawk_LoadStart = new Date();
+
+        // Enforce route rules immediately when script finishes loading
+        Tawk_API.onLoad = function() {
+            const currentPath = window.location.pathname;
+            if (currentPath === '/') {
+                Tawk_API.showWidget();
+            } else {
+                Tawk_API.hideWidget();
+            }
+        };
 
         Tawk_API.customStyle = {
             visibility: {
                 desktop: { xOffset: 20, yOffset: 20 },
-                mobile: { xOffset: 15, yOffset: 85 }
+                mobile: { xOffset: 10, yOffset: 70 } // Decreased offset on mobile
             }
         };
 
@@ -45,6 +60,7 @@ export const TawkChat = () => {
 
         const s1 = document.createElement("script");
         const s0 = document.getElementsByTagName("script")[0];
+        s1.id = "tawk-script";
         s1.async = true;
         s1.src = 'https://embed.tawk.to/69d159b6a3c0d11c365da12e/1jlcscsfq';
         s1.charset = 'UTF-8';
@@ -55,7 +71,21 @@ export const TawkChat = () => {
         } else {
             document.head.appendChild(s1);
         }
-    }, [isAdminPage, pathname]);
+    }, []);
 
-    return null;
+    return (
+        <style dangerouslySetInnerHTML={{ __html: `
+            @media (max-width: 639px) {
+                /* Target Tawk.to iframe container elements to shrink size on mobile */
+                iframe[src*="tawk.to"],
+                iframe[title="chat widget"],
+                iframe[id^="tawkchat"],
+                .tawk-min-container {
+                    transform: scale(0.75) !important;
+                    transform-origin: bottom right !important;
+                }
+            }
+        `}} />
+    );
 };
+

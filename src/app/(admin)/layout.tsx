@@ -72,7 +72,7 @@ export default function AdminLayout({
 }) {
     const router = useRouter();
     const pathname = usePathname();
-    const { user } = useAuth();
+    const { user, loading } = useAuth();
     const [isCollapsed, setIsCollapsed] = useState(false);
     const [isMounted, setIsMounted] = useState(false);
 
@@ -81,6 +81,17 @@ export default function AdminLayout({
         const saved = localStorage.getItem("admin-sidebar-collapsed");
         if (saved) setIsCollapsed(saved === "true");
     }, []);
+
+    // Defense-in-depth security guard: redirect unauthenticated or non-admin users
+    useEffect(() => {
+        if (isMounted && !loading) {
+            if (!user) {
+                router.push(`/auth?returnUrl=${encodeURIComponent(pathname)}`);
+            } else if (user.role !== "admin") {
+                router.push("/dashboard");
+            }
+        }
+    }, [user, loading, isMounted, router, pathname]);
 
     const toggleCollapse = () => {
         const newState = !isCollapsed;
@@ -99,7 +110,17 @@ export default function AdminLayout({
         }
     };
 
-    if (!isMounted) return null;
+    if (!isMounted || loading) {
+        return (
+            <div className="h-screen w-screen flex items-center justify-center bg-[#050505] text-white">
+                <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-[#c06b40]"></div>
+            </div>
+        );
+    }
+
+    if (!user || user.role !== "admin") {
+        return null;
+    }
 
     const SidebarContent = ({ isMobile = false }) => (
         <div className="flex flex-col h-full bg-[#050505] text-white">

@@ -369,7 +369,7 @@ export function ProductView({ product, reviewStats }: ProductViewProps) {
                                 onClick={handleAddToCart}
                                 disabled={isOutOfStock}
                                 className={cn(
-                                    "w-full h-10 text-black font-extrabold uppercase tracking-widest rounded-full transition-all duration-300 hover:scale-[1.01] shadow-xs text-[10px]",
+                                    "w-full h-10 font-extrabold uppercase tracking-widest rounded-full transition-all duration-300 hover:scale-[1.01] shadow-xs text-[10px]",
                                     isOutOfStock 
                                         ? "bg-muted text-muted-foreground border border-border cursor-not-allowed" 
                                         : "bg-[#AC8717] hover:bg-[#967412] text-white border border-[#AC8717]/10"
