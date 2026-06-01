@@ -41,6 +41,9 @@ importers:
       axios:
         specifier: ^1.13.6
         version: 1.13.6
+      bangladesh-location-data:
+        specifier: ^1.0.6
+        version: 1.0.6(react@19.2.3)
       class-variance-authority:
         specifier: ^0.7.1
         version: 0.7.1
@@ -2574,6 +2577,15 @@ packages:
   balanced-match@4.0.4:
     resolution: {integrity: sha512-BLrgEcRTwX2o6gGxGOCNyMvGSp35YofuYzw9h1IMTRmKqttAZZVU67bdb9Pr2vUHA8+j3i2tJfjO6C6+4myGTA==}
     engines: {node: 18 || 20 || >=22}
+
+  bangladesh-location-data@1.0.6:
+    resolution: {integrity: sha512-lf76vgVRRC6GTeIUWYyOkRfP7MlpV27KipINoamLSudnN0A7aGMgzkqj30117m5SA7FjXyU3mcmDvGIBG+rS3g==}
+    engines: {node: '>=12.0.0'}
+    peerDependencies:
+      react: '>=16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0'
+    peerDependenciesMeta:
+      react:
+        optional: true
 
   baseline-browser-mapping@2.10.10:
     resolution: {integrity: sha512-sUoJ3IMxx4AyRqO4MLeHlnGDkyXRoUG0/AI9fjK+vS72ekpV0yWVY7O0BVjmBcRtkNcsAO2QDZ4tdKKGoI6YaQ==}
@@ -7957,6 +7969,10 @@ snapshots:
   balanced-match@1.0.2: {}
 
   balanced-match@4.0.4: {}
+
+  bangladesh-location-data@1.0.6(react@19.2.3):
+    optionalDependencies:
+      react: 19.2.3
 
   baseline-browser-mapping@2.10.10: {}
 

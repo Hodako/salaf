@@ -26,6 +26,7 @@ import {
     districtsOf,
     upazilaNamesOf,
 } from "@bangladeshi/bangladesh-address/build/src/index";
+import bdLocationData from "bangladesh-location-data/english.json";
 import { logBeginCheckout, logAddShippingInfo, logAddPaymentInfo, logPurchase } from "@/lib/gtm";
 import { FcGoogle } from "react-icons/fc";
 
@@ -60,75 +61,32 @@ export default function CheckoutPage() {
     const getAreasOf = (upazilaName: string) => {
         if (!upazilaName) return [];
         
-        const geoUnions: Record<string, string[]> = {
-            // Daudkandi Upazila (Comilla) real unions
-            "Daudkandi": [
-                "Daudkandi North",
-                "Daudkandi South",
-                "Sundalpur",
-                "Gualmaro",
-                "Maruka",
-                "Mohammadpur West",
-                "Mohammadpur East",
-                "Panchgachhia",
-                "Eliotganj North",
-                "Eliotganj South",
-                "Barpara",
-                "Gouripur",
-                "Jiakhali",
-                "Zinglatali"
-            ],
-            // Savar Upazila (Dhaka) real unions
-            "Savar": [
-                "Savar Union",
-                "Aminbazar",
-                "Ashulia",
-                "Birulia",
-                "Dhamsona",
-                "Pathalia",
-                "Yarpur",
-                "Kaundia",
-                "Tetuljhora",
-                "Bhakurta",
-                "Shimulia"
-            ],
-            // Uttara (Dhaka) sectors
-            "Uttara": [
-                "Sector 1", "Sector 2", "Sector 3", "Sector 4", "Sector 5", 
-                "Sector 6", "Sector 7", "Sector 8", "Sector 9", "Sector 10", 
-                "Sector 11", "Sector 12", "Sector 13", "Sector 14", "Sector 15", 
-                "Sector 16", "Sector 17", "Sector 18"
-            ],
-            // Dhanmondi (Dhaka) roads/areas
-            "Dhanmondi": [
-                "Dhanmondi R/A",
-                "Satmasjid Road",
-                "Lake Circus",
-                "Kalabagan",
-                "Kathalbagan",
-                "Sobhanbagh"
-            ],
-            // Mirpur (Dhaka) zones
-            "Mirpur": [
-                "Mirpur Section 1", "Mirpur Section 2", "Mirpur Section 6", 
-                "Mirpur Section 10", "Mirpur Section 11", "Mirpur Section 12", 
-                "Mirpur Section 14", "Pallabi", "Shewrapara", "Kazipara"
-            ],
-            // Gulshan (Dhaka) real areas
-            "Gulshan": [
-                "Gulshan 1", "Gulshan 2", "Banani", "Baridhara R/A", "Nikunja 1", "Nikunja 2"
-            ]
-        };
+        let foundUpazilaId: number | null = null;
+        const upazilasObject = bdLocationData.upazilas_en as Record<string, Array<{ value: number, title: string }>>;
+        const unionsObject = bdLocationData.unions_en as Record<string, Array<{ value: number, title: string }>>;
 
-        const key = Object.keys(geoUnions).find(
-            k => k.toLowerCase() === upazilaName.toLowerCase()
-        );
-
-        if (key && geoUnions[key]) {
-            return [...geoUnions[key], "Other"];
+        for (const districtId of Object.keys(upazilasObject)) {
+            const upazilasList = upazilasObject[districtId];
+            const match = upazilasList.find(
+                u => u.title.toLowerCase() === upazilaName.toLowerCase()
+            );
+            if (match) {
+                foundUpazilaId = match.value;
+                break;
+            }
+        }
+        
+        if (foundUpazilaId) {
+            const unionsList = unionsObject[foundUpazilaId] || [];
+            const titles = unionsList.map(un => un.title);
+            if (titles.length > 0) {
+                // Filter out duplicates and clean titles
+                const uniqueTitles = Array.from(new Set(titles));
+                return [...uniqueTitles, "Other"];
+            }
         }
 
-        // Generic fallback unions for other Upazilas in Bangladesh
+        // Generic fallback unions for other Upazilas in Bangladesh if not found
         return [
             `${upazilaName} Union 1`,
             `${upazilaName} Union 2`,

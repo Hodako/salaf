@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useMemo } from "react";
 import Image from "next/image";
-import { Star, Heart, Minus, Plus, ShoppingBag } from "lucide-react";
+import { Star, Heart, Minus, Plus, ShoppingBag, CreditCard } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -478,14 +478,14 @@ export function ProductView({ product, reviewStats }: ProductViewProps) {
                 isOverlayVisible ? "translate-y-0 opacity-100" : "translate-y-full opacity-0 pointer-events-none"
             )}
             style={{ 
-                paddingTop: "14px",
-                paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 16px)"
+                paddingTop: "8px",
+                paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 10px)"
             }}
             >
                 <div className="flex items-center justify-between gap-3 w-full">
                     {/* Product Thumbnail & Highly Structured Metadata Info */}
                     <div className="flex items-center gap-2.5 max-w-[50%] shrink-0">
-                        <div className="w-11 h-11 relative bg-white rounded-lg overflow-hidden border border-black/10 shrink-0 shadow-xs">
+                        <div className="w-9 h-9 relative bg-white rounded-lg overflow-hidden border border-black/10 shrink-0 shadow-sm">
                             <Image
                                 src={activeImg}
                                 alt=""
@@ -494,7 +494,7 @@ export function ProductView({ product, reviewStats }: ProductViewProps) {
                             />
                         </div>
                         <div className="flex flex-col min-w-0">
-                            <span className="text-[11px] font-black text-gray-950 leading-tight truncate uppercase font-heading tracking-wide">
+                            <span className="text-[10px] font-black text-gray-950 leading-none truncate uppercase font-heading tracking-wide">
                                 {product.name}
                             </span>
                             <div className="flex items-center gap-2 mt-1 leading-none text-gray-800">
@@ -502,7 +502,7 @@ export function ProductView({ product, reviewStats }: ProductViewProps) {
                                     {activeVariation?.volume}{activeVariation?.volumeUnit}
                                 </span>
                                 <span className="text-gray-800/40 text-[9px] shrink-0">|</span>
-                                <span className="text-[13px] font-black text-gray-950 shrink-0">
+                                <span className="text-[12px] font-black text-gray-950 shrink-0">
                                     ৳ {price.toLocaleString()}
                                 </span>
                             </div>
@@ -515,24 +515,22 @@ export function ProductView({ product, reviewStats }: ProductViewProps) {
                             onClick={handleAddToCart}
                             disabled={isOutOfStock}
                             className={cn(
-                                "w-10 h-10 rounded-full flex items-center justify-center shrink-0 border transition-all duration-300 cursor-pointer shadow-xs",
-                                isOutOfStock 
-                                    ? "bg-gray-300/30 border-gray-400/25 text-gray-500 cursor-not-allowed"
-                                    : isAlreadyInCart
-                                        ? "bg-green-700/20 border-green-600/30 text-green-800"
-                                        : "bg-black/10 border-black/10 text-gray-950 hover:bg-black/15 active:scale-95"
+                                "w-9 h-9 rounded-full flex items-center justify-center shrink-0 transition-all duration-300 cursor-pointer shadow-md bg-black/10 border-t border-t-white/40 border-b border-b-black/30 border-x border-x-black/15 text-gray-950 hover:bg-black/15 active:scale-95",
+                                isOutOfStock && "opacity-50 cursor-not-allowed",
+                                isAlreadyInCart && "bg-green-700/20 border-green-600/30 text-green-800"
                             )}
                             title="Add to Cart"
                         >
-                            <ShoppingBag className="w-4 h-4" />
+                            <ShoppingBag className="w-3.5 h-3.5" />
                         </button>
 
                         {!isOutOfStock && (
                             <button
                                 onClick={handleBuyNow}
-                                className="h-10 px-5 bg-black/10 hover:bg-black/15 active:scale-[0.98] text-gray-950 font-black text-[10px] uppercase tracking-widest rounded-full transition-all duration-300 flex-1 max-w-[125px] flex items-center justify-center cursor-pointer shadow-xs border border-black/10"
+                                className="h-9 px-4 bg-black/10 hover:bg-black/15 active:scale-[0.98] text-gray-950 font-black text-[9px] uppercase tracking-widest rounded-full transition-all duration-300 flex-1 max-w-[120px] flex items-center justify-center cursor-pointer shadow-md border-t border-t-white/40 border-b border-b-black/30 border-x border-x-black/15 gap-1.5"
                             >
-                                ⚡ Buy
+                                <CreditCard className="w-3.5 h-3.5 shrink-0" />
+                                <span>Buy</span>
                             </button>
                         )}
                     </div>
