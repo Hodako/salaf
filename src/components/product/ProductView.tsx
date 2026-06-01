@@ -20,6 +20,19 @@ export function ProductView({ product, reviewStats }: ProductViewProps) {
     const [selectedIdx, setSelectedIdx] = useState<number>(0);
     const [qty, setQty] = useState(1);
     const [activeImg, setActiveImg] = useState(product.featuredImage || (product.images && product.images[0]));
+    const [showStickyBar, setShowStickyBar] = useState(false);
+
+    useEffect(() => {
+        const handleScroll = () => {
+            if (window.scrollY > 450) {
+                setShowStickyBar(true);
+            } else {
+                setShowStickyBar(false);
+            }
+        };
+        window.addEventListener("scroll", handleScroll, { passive: true });
+        return () => window.removeEventListener("scroll", handleScroll);
+    }, []);
 
     // Consolidate unique images: Featured + Gallery (Variant images hidden here as requested)
     const allGalleryImages = useMemo(() => {
@@ -427,6 +440,61 @@ export function ProductView({ product, reviewStats }: ProductViewProps) {
                 )}
             </div>
 
+            {/* Sticky Bottom Buy/Cart Mobile Overlay */}
+            <div className={cn(
+                "lg:hidden fixed bottom-0 left-0 right-0 z-[90] bg-[#050505]/95 backdrop-blur-xl border-t border-white/10 px-4 py-3 transition-all duration-500 ease-in-out transform flex items-center justify-between gap-3 shadow-[0_-8px_30px_rgba(0,0,0,0.5)]",
+                showStickyBar ? "translate-y-0 opacity-100" : "translate-y-full opacity-0 pointer-events-none"
+            )}
+            style={{ paddingBottom: "env(safe-area-inset-bottom, 12px)" }}
+            >
+                {/* Product Thumbnail & Price info */}
+                <div className="flex items-center gap-2.5 max-w-[45%] shrink-0">
+                    <div className="w-10 h-10 relative bg-white rounded-lg overflow-hidden border border-white/10 shrink-0">
+                        <Image
+                            src={activeImg}
+                            alt=""
+                            fill
+                            className="object-contain p-1"
+                        />
+                    </div>
+                    <div className="flex flex-col min-w-0">
+                        <span className="text-[10px] text-gray-400 font-bold uppercase tracking-wider truncate leading-none">
+                            {activeVariation?.volume}{activeVariation?.volumeUnit}
+                        </span>
+                        <span className="text-[14px] font-black text-[#d4af37] leading-none mt-1">
+                            ৳ {price.toLocaleString()}
+                        </span>
+                    </div>
+                </div>
+
+                {/* Actions: Add to Cart icon button & Buy Now Capsule */}
+                <div className="flex items-center gap-2 flex-1 justify-end">
+                    <button
+                        onClick={handleAddToCart}
+                        disabled={isOutOfStock}
+                        className={cn(
+                            "w-10 h-10 rounded-full flex items-center justify-center shrink-0 border transition-all duration-300 cursor-pointer",
+                            isOutOfStock 
+                                ? "bg-muted border-border text-muted-foreground cursor-not-allowed"
+                                : isAlreadyInCart
+                                    ? "bg-green-600/20 border-green-500/30 text-green-400"
+                                    : "bg-white/10 border-white/10 text-white hover:bg-white/20 active:scale-95"
+                        )}
+                        title="Add to Cart"
+                    >
+                        <ShoppingBag className="w-4 h-4" />
+                    </button>
+
+                    {!isOutOfStock && (
+                        <button
+                            onClick={handleBuyNow}
+                            className="h-10 px-5 bg-[#d4af37] hover:bg-[#c49d2e] active:scale-[0.98] text-black font-extrabold text-[10px] uppercase tracking-widest rounded-full transition-all duration-300 flex-1 max-w-[140px] flex items-center justify-center cursor-pointer"
+                        >
+                            ⚡ Buy Now
+                        </button>
+                    )}
+                </div>
+            </div>
 
         </section>
     );
