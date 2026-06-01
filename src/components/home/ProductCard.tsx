@@ -179,9 +179,17 @@ export const ProductCard = ({
                 whileHover={{ y: -6, transition: { duration: 0.2 } }}
                 className={cn("hidden lg:flex flex-col rounded-[2rem] overflow-hidden transition-all duration-700 bg-white group cursor-pointer h-full w-full max-w-[320px] mx-auto shrink-0 relative border border-black/5 shadow-sm hover:shadow-xl hover:shadow-black/10")}
             >
+                {/* Entire Card Absolute Overlay Link for Instant Navigation on Desktop */}
+                <Link
+                    href={`/product/${product.slug}`}
+                    onClick={handleClick}
+                    className="absolute inset-0 z-10"
+                    aria-label={product.name}
+                />
+
                 {/* Image Container */}
                 <div className="relative w-full aspect-300/410 overflow-hidden bg-white transition-all duration-500 shadow-sm shadow-black/5 group-hover:shadow-xl group-hover:shadow-black/10">
-                    <Link href={`/product/${product.slug}`} onClick={handleClick} className="absolute inset-0 z-0">
+                    <div className="absolute inset-0 z-0">
                         <Image
                             src={product.featuredImage || product.images[0]}
                             alt={product.name}
@@ -189,11 +197,11 @@ export const ProductCard = ({
                             className="object-cover transition-transform duration-700 group-hover:scale-105"
                             sizes="300px"
                         />
-                    </Link>
+                    </div>
 
                     {/* Sale Badge */}
                     {isOnSale && (
-                        <div className="absolute top-4 left-4 z-10">
+                        <div className="absolute top-4 left-4 z-20">
                             <span className="bg-red-600 text-white text-[9px] font-black uppercase tracking-widest px-2.5 py-0.5 rounded-full shadow-lg">
                                 Sale
                             </span>
@@ -229,20 +237,20 @@ export const ProductCard = ({
                     </div>
 
                     {/* Desktop Hover Button */}
-                    <Link href={`/product/${product.slug}`} className={cn("absolute bottom-5 left-5 right-5 z-20 transition-all duration-500 transform", "opacity-0 translate-y-4 pointer-events-none group-hover:opacity-100 group-hover:translate-y-0 group-hover:pointer-events-auto")}>
+                    <div className={cn("absolute bottom-5 left-5 right-5 z-20 transition-all duration-500 transform", "opacity-0 translate-y-4 pointer-events-none group-hover:opacity-100 group-hover:translate-y-0 group-hover:pointer-events-auto")}>
                         <Button
                             variant="outline"
-                            className="w-full h-10 bg-white/95 backdrop-blur-sm border-white/50 text-bprimary-dark font-bold uppercase tracking-[0.15em] text-[10px] rounded-full hover:bg-bprimary-dark hover:text-white hover:border-bprimary-dark hover:shadow-xl transition-all duration-500 shadow-lg"
+                            className="w-full h-10 bg-white/95 backdrop-blur-sm border-white/50 text-bprimary-dark font-bold uppercase tracking-[0.15em] text-[10px] rounded-full hover:bg-bprimary-dark hover:text-white hover:border-bprimary-dark hover:shadow-xl transition-all duration-500 shadow-lg cursor-pointer"
                         >
                             <ShoppingBag className="w-3.5 h-3.5 mr-2" />
                             Select Options
                         </Button>
-                    </Link>
+                    </div>
                 </div>
 
                 {/* Content Container */}
-                <div className="p-4 flex flex-col items-center justify-center text-center gap-3">
-                    <Link href={`/product/${product.slug}`} onClick={handleClick} className="space-y-1 w-full">
+                <div className="p-4 flex flex-col items-center justify-center text-center gap-3 relative z-0">
+                    <div className="space-y-1 w-full">
                         <h3 className="text-sm font-heading font-bold uppercase tracking-[0.15em] text-foreground/90 group-hover:text-bprimary-dark transition-colors line-clamp-1">
                             {product.name}
                         </h3>
@@ -256,7 +264,7 @@ export const ProductCard = ({
                                 )
                             )}
                         </div>
-                    </Link>
+                    </div>
                 </div>
             </motion.div>
 
