@@ -11,7 +11,9 @@ vi.mock('@/hooks/useWishlist', () => ({ useWishlist: () => ({ isInWishlist: () =
 vi.mock('lucide-react', () => ({ 
     Heart: () => <svg data-testid="heart-icon" />, 
     ShoppingCart: () => <svg data-testid="cart-icon" />,
-    Star: () => <svg data-testid="star-icon" />
+    Star: () => <svg data-testid="star-icon" />,
+    Eye: () => <svg data-testid="eye-icon" />,
+    ShoppingBag: () => <svg data-testid="shopping-bag-icon" />
 }));
 vi.mock('@/lib/gtm', () => ({ logSelectItem: vi.fn() }));
 
@@ -31,11 +33,12 @@ const mockProduct: ClientProduct = {
 describe('ProductCard Integration Suite', () => {
     it('successfully mounts and renders product title', () => {
         render(<ProductCard product={mockProduct} config={{ showPrice: true, showVolume: true, theme: 'dark' }} />);
-        expect(screen.getByText('Luxury Oud')).toBeInTheDocument();
+        // Use getAllByText because component renders both mobile and desktop versions
+        expect(screen.getAllByText('Luxury Oud')[0]).toBeInTheDocument();
     });
 
     it('correctly calculates formatting for the base price constraint', () => {
         render(<ProductCard product={mockProduct} config={{ showPrice: true, showVolume: true, theme: 'dark' }} />);
-        expect(screen.getByText(/5,000/)).toBeInTheDocument(); // Currency format assertion
+        expect(screen.getAllByText(/5,000/)[0]).toBeInTheDocument(); // Currency format assertion
     });
 });
