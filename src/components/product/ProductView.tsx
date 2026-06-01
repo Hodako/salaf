@@ -23,46 +23,29 @@ export function ProductView({ product, reviewStats }: ProductViewProps) {
     const [isOverlayVisible, setIsOverlayVisible] = useState(true);
 
     useEffect(() => {
-        let observer: IntersectionObserver | null = null;
-        let retryCount = 0;
-        const maxRetries = 10;
-
-        const setupObserver = () => {
-            const footer = document.querySelector("footer");
-            if (footer) {
-                observer = new IntersectionObserver(
-                    ([entry]) => {
-                        // Hide overlay bar ONLY when footer is intersecting (visible on screen)
-                        setIsOverlayVisible(!entry.isIntersecting);
-                    },
-                    {
-                        root: null,
-                        rootMargin: "0px",
-                        threshold: 0.05,
-                    }
-                );
-                observer.observe(footer);
-                return true;
+        const handleScroll = () => {
+            const buyBox = document.getElementById("pdp-buy-box");
+            if (buyBox) {
+                const rect = buyBox.getBoundingClientRect();
+                // If the top of the Buy Box has scrolled past 60px from the top of the screen,
+                // it means the user has reached it or scrolled past/under it, so we hide the overlay.
+                // Otherwise (when the scroll position is above the Buy Box), we show it!
+                if (rect.top > 60) {
+                    setIsOverlayVisible(true);
+                } else {
+                    setIsOverlayVisible(false);
+                }
+            } else {
+                setIsOverlayVisible(true);
             }
-            return false;
         };
 
-        const success = setupObserver();
-
-        let intervalId: NodeJS.Timeout | null = null;
-        if (!success) {
-            intervalId = setInterval(() => {
-                retryCount++;
-                const ok = setupObserver();
-                if (ok || retryCount >= maxRetries) {
-                    if (intervalId) clearInterval(intervalId);
-                }
-            }, 300);
-        }
+        window.addEventListener("scroll", handleScroll, { passive: true });
+        // Check immediately on mount/load
+        handleScroll();
 
         return () => {
-            if (intervalId) clearInterval(intervalId);
-            if (observer) observer.disconnect();
+            window.removeEventListener("scroll", handleScroll);
         };
     }, []);
 
@@ -332,7 +315,7 @@ export function ProductView({ product, reviewStats }: ProductViewProps) {
                 </div>
 
                 {/* Amazon "Buy Box" Card wrapper */}
-                <div className="border border-[#AC8717]/25 bg-white/70 backdrop-blur-md rounded-xl md:rounded-2xl p-3 md:p-5 shadow-xs space-y-2.5 md:space-y-3.5 mt-1 md:mt-2">
+                <div id="pdp-buy-box" className="border border-[#AC8717]/25 bg-white/70 backdrop-blur-md rounded-xl md:rounded-2xl p-3 md:p-5 shadow-xs space-y-2.5 md:space-y-3.5 mt-1 md:mt-2">
                     {/* Price & Savings Display */}
                     <div className="space-y-1">
                         <div className="flex items-baseline gap-2">

@@ -103,8 +103,8 @@ const Footer = async () => {
                         <Heart className="w-3.5 h-3.5 text-red-500 fill-red-500 inline-block mx-0.5" />
                         <span>by</span>
                         <Link href="https://farhansadiq.dev" target="_blank" className="text-gray-950 font-black hover:text-black hover:underline hover:cursor-pointer transition-colors">Farhan Sadiq</Link>
-                        <span className="mx-1 text-gray-950/40">|</span>
-                        <span className="font-semibold text-gray-950">Special Thanks to Mr Azizul Hakim</span>
+                        <span className="mx-1 text-gray-950/70">&</span>
+                        <Link href="https://azizul.iam.bd" target="_blank" className="text-gray-950 font-black hover:text-black hover:underline hover:cursor-pointer transition-colors">Azizul Hakim khan</Link>
                     </p>
                 </div>
             </div>
