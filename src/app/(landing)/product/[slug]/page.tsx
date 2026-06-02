@@ -93,19 +93,18 @@ export default async function ProductPage({ params }: ProductPageProps) {
   await dbConnect();
   const { slug } = await params;
 
-  const product = await Product.findOne({ slug }).populate("collections tags brand").lean();
+  // Run initial queries in parallel to drastically improve TTFB and decrease skeleton time
+  const [product, template] = await Promise.all([
+      Product.findOne({ slug }).populate("collections tags brand").lean(),
+      Page.findOne({ type: 'product_template', status: 'published' }).sort({ updatedAt: -1 }).lean().catch(() => null)
+  ]);
+
   if (!product) {
     notFound();
   }
 
   // Instantly load review count and avgRating for above-the-fold display and SEO JSON-LD
   const { totalReviews, avgRating } = await getProductReviewSummary(product._id);
-
-  // Fetch Custom Product Template if exists
-  let template = null;
-  try {
-    template = await Page.findOne({ type: 'product_template', status: 'published' }).sort({ updatedAt: -1 }).lean() as any;
-  } catch (e) {}
 
   // Sanitize for Client Components (JSON serializable only)
   const productData = JSON.parse(JSON.stringify(product));

@@ -21,6 +21,11 @@ export function ProductView({ product, reviewStats }: ProductViewProps) {
     const [qty, setQty] = useState(1);
     const [activeImg, setActiveImg] = useState(product.featuredImage || (product.images && product.images[0]));
     const [isOverlayVisible, setIsOverlayVisible] = useState(true);
+    const [isMounted, setIsMounted] = useState(false);
+
+    useEffect(() => {
+        setIsMounted(true);
+    }, []);
 
     useEffect(() => {
         const handleScroll = () => {
@@ -209,18 +214,20 @@ export function ProductView({ product, reviewStats }: ProductViewProps) {
                                     activeImg === img ? "border-[#AC8717] ring-2 ring-[#AC8717]/20" : "opacity-60 border-border hover:opacity-100"
                                 )}
                             >
-                                <Image src={img} alt="" fill className="object-cover p-1.5" />
+                                <Image src={img} alt="" fill className="object-cover p-1.5" loading="lazy" sizes="64px" />
                             </button>
                         ))}
                     </div>
                 )}
 
-                {/* Hidden Preload Container for Variant Images */}
-                <div className="hidden pointer-events-none absolute h-0 w-0 overflow-hidden" aria-hidden="true">
-                    {product.variations?.map((v: any, i: number) => v.image && (
-                        <Image key={i} src={v.image} alt="" width={1} height={1} />
-                    ))}
-                </div>
+                {/* Hidden Preload Container for Variant Images (Deferred until client mount to prioritize primary LCP image) */}
+                {isMounted && (
+                    <div className="hidden pointer-events-none absolute h-0 w-0 overflow-hidden" aria-hidden="true">
+                        {product.variations?.map((v: any, i: number) => v.image && (
+                            <Image key={i} src={v.image} alt="" width={1} height={1} />
+                        ))}
+                    </div>
+                )}
             </div>
 
             {/* Right: Product Info & Buy Box */}
