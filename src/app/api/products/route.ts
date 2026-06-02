@@ -95,11 +95,18 @@ export async function GET(request: Request) {
         // If searching, use a faster find query instead of aggregation to minimize overhead
         if (q) {
             console.time("[DB Telemetry] Search Products Query");
-            const products = await Product.find(query)
+            const rawProducts = await Product.find(query)
                 .select("name slug featuredImage images variations isOnSale")
                 .sort(sortOption)
                 .limit(limit)
                 .lean();
+            const products = rawProducts.map((product: any) => {
+                const { images, ...cardProduct } = product;
+                return {
+                    ...cardProduct,
+                    featuredImage: cardProduct.featuredImage || images?.[0] || "",
+                };
+            });
             console.timeEnd("[DB Telemetry] Search Products Query");
             
             let didYouMean = null;
@@ -186,6 +193,9 @@ export async function GET(request: Request) {
                 },
                 {
                     $addFields: {
+                        featuredImage: {
+                            $ifNull: ["$featuredImage", { $arrayElemAt: ["$images", 0] }]
+                        },
                         reviewCount: { 
                             $add: [{ $size: "$reviews" }, { $size: "$externalReviews" }] 
                         },
@@ -219,8 +229,16 @@ export async function GET(request: Request) {
                 },
                 {
                     $project: {
-                        reviews: 0,
-                        externalReviews: 0
+                        _id: 1,
+                        name: 1,
+                        slug: 1,
+                        skuPrefix: 1,
+                        featuredImage: 1,
+                        variations: 1,
+                        isOnSale: 1,
+                        rating: 1,
+                        reviewCount: 1,
+                        createdAt: 1
                     }
                 }
             ]),

@@ -38,28 +38,12 @@ export const ProductCard = ({
     const isWishlisted = isInWishlist(product._id);
     const isOnSale = !!product.isOnSale;
     const hasSaleTrigger = product.variations?.some((v: IVariation) => v.salePrice && v.salePrice < v.basePrice);
+    const cardImage = product.featuredImage || product.images?.[0] || "/logo.png";
 
     const { addToCart, cart = [], setIsCartOpen } = useCart();
 
-    const preloadImage = (src: string) => {
-        if (!src || typeof window === 'undefined') return;
-        const img = new window.Image();
-        img.src = src;
-    };
-
     const handlePrefetch = () => {
-        // Prefetch the Next.js router data & bundles
         router.prefetch(`/product/${product.slug}`);
-
-        // Preload the product images into browser cache via Service Worker
-        if (product.featuredImage) {
-            preloadImage(product.featuredImage);
-        }
-        if (product.images && product.images.length > 0) {
-            product.images.slice(0, 3).forEach((img: string) => {
-                preloadImage(img);
-            });
-        }
     };
 
     const handleQuickAdd = (e: React.MouseEvent) => {
@@ -78,7 +62,7 @@ export const ProductCard = ({
         addToCart({
             productId: product._id,
             productName: product.name,
-            featuredImage: product.featuredImage || product.images?.[0],
+            featuredImage: cardImage,
             variationIdx: 0,
             volume: `${activeVar.volume}${activeVar.volumeUnit}`,
             price: activeVar.salePrice || activeVar.basePrice,
@@ -103,7 +87,7 @@ export const ProductCard = ({
             addToCart({
                 productId: product._id,
                 productName: product.name,
-                featuredImage: product.featuredImage || product.images?.[0],
+                featuredImage: cardImage,
                 variationIdx: 0,
                 volume: `${activeVar.volume}${activeVar.volumeUnit}`,
                 price: activeVar.salePrice || activeVar.basePrice,
@@ -216,7 +200,7 @@ export const ProductCard = ({
                 <div className="relative w-full aspect-300/410 overflow-hidden bg-white transition-all duration-500 shadow-sm shadow-black/5 group-hover:shadow-xl group-hover:shadow-black/10">
                     <div className="absolute inset-0 z-0">
                         <Image
-                            src={product.featuredImage || product.images[0]}
+                            src={cardImage}
                             alt={product.name}
                             fill
                             className="object-cover transition-transform duration-700 group-hover:scale-105"
@@ -319,12 +303,11 @@ export const ProductCard = ({
                     style={{ aspectRatio: "1 / 1.06" }}
                 >
                     <Image
-                        src={product.featuredImage || product.images[0]}
+                        src={cardImage}
                         alt={product.name}
                         fill
                         className="object-cover transition-transform duration-300"
                         sizes="(max-width: 640px) 50vw, 33vw"
-                        priority
                     />
 
                     {/* Sale badge — top-left, sharp */}

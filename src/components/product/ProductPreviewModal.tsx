@@ -105,12 +105,6 @@ export function ProductPreviewModal({ product, isOpen, onOpenChange }: ProductPr
                             </div>
                         )}
 
-                        {/* Hidden Preload Container for Variant Images */}
-                        <div className="hidden pointer-events-none absolute h-0 w-0 overflow-hidden" aria-hidden="true">
-                            {product.variations?.map((v: any, i: number) => v.image && (
-                                <Image key={i} src={v.image} alt="" width={1} height={1} />
-                            ))}
-                        </div>
                     </div>
 
                     {/* Right: Product Info */}

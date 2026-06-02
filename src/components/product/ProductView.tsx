@@ -21,11 +21,6 @@ export function ProductView({ product, reviewStats }: ProductViewProps) {
     const [qty, setQty] = useState(1);
     const [activeImg, setActiveImg] = useState(product.featuredImage || (product.images && product.images[0]));
     const [isOverlayVisible, setIsOverlayVisible] = useState(true);
-    const [isMounted, setIsMounted] = useState(false);
-
-    useEffect(() => {
-        setIsMounted(true);
-    }, []);
 
     useEffect(() => {
         const handleScroll = () => {
@@ -184,14 +179,6 @@ export function ProductView({ product, reviewStats }: ProductViewProps) {
             {/* Left: Product Gallery */}
             <div className="w-full md:w-1/2 flex flex-col gap-2 md:gap-4">
                 <div className="relative w-full h-[380px] sm:h-[440px] md:h-[480px] overflow-hidden group rounded-none md:rounded-2xl bg-[#AC8717]/10 border-y md:border border-[#AC8717]/20">
-                    <Image
-                        src={activeImg}
-                        alt=""
-                        fill
-                        className="object-cover scale-110 blur-2xl opacity-45 md:hidden"
-                        sizes="100vw"
-                        aria-hidden="true"
-                    />
                     <div className="absolute inset-0 bg-white/55 md:hidden" aria-hidden="true" />
                     <Image
                         src={activeImg}
@@ -216,15 +203,6 @@ export function ProductView({ product, reviewStats }: ProductViewProps) {
                             >
                                 <Image src={img} alt="" fill className="object-cover p-1.5" loading="lazy" sizes="64px" />
                             </button>
-                        ))}
-                    </div>
-                )}
-
-                {/* Hidden Preload Container for Variant Images (Deferred until client mount to prioritize primary LCP image) */}
-                {isMounted && (
-                    <div className="hidden pointer-events-none absolute h-0 w-0 overflow-hidden" aria-hidden="true">
-                        {product.variations?.map((v: any, i: number) => v.image && (
-                            <Image key={i} src={v.image} alt="" width={1} height={1} />
                         ))}
                     </div>
                 )}
@@ -312,7 +290,7 @@ export function ProductView({ product, reviewStats }: ProductViewProps) {
                             >
                                 {v.image && (
                                     <div className="relative w-4 h-4 rounded-full overflow-hidden border border-border/80 shrink-0">
-                                        <Image src={v.image} alt="" fill className="object-cover" />
+                                        <Image src={v.image} alt="" fill className="object-cover" loading="lazy" sizes="16px" />
                                     </div>
                                 )}
                                 <span>{v.volume}{v.volumeUnit} {v.variantType ? `(${v.variantType})` : ""}</span>
