@@ -1,14 +1,33 @@
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
+import { Suspense } from 'react';
 import { dbConnect } from "@/helpers";
 import { Product, Page } from "@/models";
-import Review from "@/models/Review";
-import ExternalReview from "@/models/ExternalReview";
-import { ProductView, ProductStory, ReviewSection, RelatedProducts } from "@/components/product";
+import { ProductView, ProductStory } from "@/components/product";
 import { TemplateInjector } from "@/components/blocks/TemplateInjector";
+import { getReviewStats } from "@/helpers/product-stats";
+import { ReviewsWrapper } from "@/components/product/ReviewsWrapper";
+import { RelatedProductsWrapper } from "@/components/product/RelatedProductsWrapper";
 
 interface ProductPageProps {
   params: Promise<{ slug: string }>;
+}
+
+// Enable ISR for instant delivery from cache
+export const revalidate = 3600;
+
+// Pre-render the most recent 50 products at build time
+export async function generateStaticParams() {
+  await dbConnect();
+  const products = await Product.find({})
+    .sort({ createdAt: -1 })
+    .limit(50)
+    .select('slug')
+    .lean();
+
+  return products.map((p: any) => ({
+    slug: p.slug,
+  }));
 }
 
 export async function generateMetadata({ params }: ProductPageProps): Promise<Metadata> {
@@ -49,75 +68,25 @@ export default async function ProductPage({ params }: ProductPageProps) {
   await dbConnect();
   const { slug } = await params;
 
-  const product = await Product.findOne({ slug }).populate("collections tags brand").lean();
+  // Find product basic details first to get the ID for parallel fetching
+  const initialProduct = await Product.findOne({ slug }).select('_id').lean();
+  if (!initialProduct) {
+    notFound();
+  }
+
+  // Parallelize all data fetching to eliminate sequential DB round-trips
+  const [product, template, reviewStats] = await Promise.all([
+    Product.findById(initialProduct._id).populate("collections tags brand").lean(),
+    Page.findOne({ type: 'product_template', status: 'published' }).sort({ updatedAt: -1 }).lean().catch(() => null),
+    getReviewStats(initialProduct._id as any)
+  ]);
+
   if (!product) {
     notFound();
   }
 
-  // Fetch Reviews (Internal & External)
-  const [internalReviews, externalReviews] = await Promise.all([
-    Review.find({ product: product._id, isApproved: true })
-      .populate('userId', 'image name')
-      .sort({ createdAt: -1 })
-      .lean(),
-    ExternalReview.find({ product: product._id, isApproved: true })
-      .sort({ date: -1, createdAt: -1 })
-      .lean()
-  ]);
-
-  // Combine reviews
-  const formattedInternal = internalReviews.map((r: any) => ({
-    ...r,
-    user: r.userId?.name || r.user || 'Anonymous Customer',
-    userImage: r.userId?.image,
-    type: 'internal'
-  }));
-  const formattedExternal = externalReviews.map((r: any) => ({
-    ...r,
-    reviewerName: r.reviewerName,
-    user: r.reviewerName,
-    rating: r.rating,
-    comment: r.content,
-    images: r.images?.length > 0 ? r.images : (r.image ? [r.image] : []),
-    createdAt: r.date || r.createdAt,
-    source: r.source,
-    type: 'external'
-  }));
-
-  const allReviews = [...formattedInternal, ...formattedExternal].sort((a, b) => 
-    new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-  );
-
-  // Recalculate stats for combined reviews
-  const totalReviews = allReviews.length;
-  const avgRating = totalReviews > 0 
-    ? allReviews.reduce((acc: number, curr: any) => acc + curr.rating, 0) / totalReviews 
-    : 0;
-
-  const starDistribution = [5, 4, 3, 2, 1].map((star: number) => {
-    const count = allReviews.filter((r: any) => Math.round(r.rating) === star).length;
-    return {
-      star,
-      count,
-      percentage: totalReviews > 0 ? (count / totalReviews) * 100 : 0
-    };
-  });
-
-  // Related Products (Discover More)
-  const relatedProductsRaw = await Product.find({
-    collections: { $in: product.collections },
-    _id: { $ne: product._id }
-  }).limit(4).lean();
-
-  // Fetch Custom Product Template if exists
-  let template = null;
-  try {
-    template = await Page.findOne({ type: 'product_template', status: 'published' }).sort({ updatedAt: -1 }).lean() as any;
-  } catch (e) {}
-
   // Sanitize for Client Components (JSON serializable only)
   const productData = JSON.parse(JSON.stringify(product));
-  const relatedProductsData = JSON.parse(JSON.stringify(relatedProductsRaw));
 
   if (template?.html) {
     return (
@@ -185,6 +154,46 @@ export default async function ProductPage({ params }: ProductPageProps) {
     }))
   };
 
+  const productSchema = {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    "name": product.name,
+    "image": [product.featuredImage, ...(product.images || [])],
+    "description": product.seoDescription || product.name,
+    "sku": product.skuPrefix,
+    "brand": {
+      "@type": "Brand",
+      "name": product.brand && typeof product.brand !== 'string' ? (product.brand as any).name : "Salaf"
+    },
+    "aggregateRating": reviewStats.totalReviews > 0 ? {
+      "@type": "AggregateRating",
+      "ratingValue": Number(reviewStats.avgRating.toFixed(1)),
+      "reviewCount": reviewStats.totalReviews,
+      "bestRating": "5",
+      "worstRating": "1"
+    } : undefined,
+    "offers": {
+      "@type": "AggregateOffer",
+      "priceCurrency": "BDT",
+      "lowPrice": (product.variations && product.variations.length > 0) ? Math.min(...product.variations.map((v: any) => Number(v.salePrice || v.basePrice))) : 0,
+      "highPrice": (product.variations && product.variations.length > 0) ? Math.max(...product.variations.map((v: any) => Number(v.salePrice || v.basePrice))) : 0,
+      "offerCount": product.variations?.length || 0,
+      "offers": product.variations?.map((v: any) => ({
+        "@type": "Offer",
+        "price": Number(v.salePrice || v.basePrice),
+        "priceCurrency": "BDT",
+        "availability": v.stock !== undefined && Number(v.stock) > 0 ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
+        "sku": v.sku,
+        "priceValidUntil": "2027-12-31"
+      })) || []
+    },
+    "additionalProperty": product.attributes?.map((attr: any) => ({
+      "@type": "PropertyValue",
+      "name": attr.key,
+      "value": attr.value
+    }))
+  };
+
   return (
     <main className="bg-background min-h-screen text-foreground pt-2 md:pt-8 pb-8">
       {/* Inject JSON-LD Schema scripts */}
@@ -195,6 +204,10 @@ export default async function ProductPage({ params }: ProductPageProps) {
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(productSchema) }}
       />
 
       <div className="container mx-auto px-0 md:px-6">
@@ -218,19 +231,26 @@ export default async function ProductPage({ params }: ProductPageProps) {
         {/* Primary Info: Gallery + Actions */}
         <ProductView 
           product={productData} 
-          reviewStats={{ avgRating, totalReviews }} 
+          reviewStats={reviewStats}
         />
 
-        {/* Secondary Info: Story Sections */}
-        <ProductStory sections={productData.detailsSections} />
+        {/* Secondary Info: Story Sections - Streamed */}
+        <Suspense fallback={<div className="h-[400px] animate-pulse bg-muted/20 border border-border/40 rounded-3xl mt-12 mx-auto max-w-7xl" />}>
+          <ProductStory sections={productData.detailsSections} />
+        </Suspense>
 
-        {/* Review Section */}
-        <ReviewSection 
-          productId={productData._id}
-          productName={productData.name}
-          reviews={JSON.parse(JSON.stringify(allReviews))} 
-          stats={{ avgRating, totalReviews, starDistribution }} 
-        />
+        {/* Review Section - Streamed */}
+        <Suspense fallback={
+          <div className="mt-12 space-y-8 animate-pulse max-w-4xl mx-auto">
+            <div className="h-10 w-64 bg-muted/30 rounded-full mx-auto" />
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+               <div className="h-40 bg-muted/20 rounded-2xl md:col-span-1" />
+               <div className="h-40 bg-muted/20 rounded-2xl md:col-span-2" />
+            </div>
+          </div>
+        }>
+          <ReviewsWrapper productId={productData._id} productName={productData.name} />
+        </Suspense>
 
         {/* Accessible FAQ Accordion */}
         <section aria-labelledby="product-faq-heading" className="mt-8 md:mt-12 border-t border-border pt-6 max-w-4xl mx-auto">
@@ -254,8 +274,16 @@ export default async function ProductPage({ params }: ProductPageProps) {
           </div>
         </section>
 
-        {/* Cross-Sell: Related Products */}
-        <RelatedProducts products={relatedProductsData} />
+        {/* Cross-Sell: Related Products - Streamed */}
+        <Suspense fallback={
+          <div className="mt-12 grid grid-cols-2 md:grid-cols-4 gap-4 animate-pulse">
+            {[1, 2, 3, 4].map(i => (
+              <div key={i} className="aspect-[3/4] bg-muted rounded-xl" />
+            ))}
+          </div>
+        }>
+          <RelatedProductsWrapper collections={productData.collections} excludeId={productData._id} />
+        </Suspense>
       </div>
     </main>
   );

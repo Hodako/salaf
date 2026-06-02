@@ -1,8 +1,9 @@
 "use client";
 
 import React, { useState, useEffect, useMemo } from "react";
+import dynamic from "next/dynamic";
 import Image from "next/image";
-import { Star, Heart, Minus, Plus, ShoppingBag, CreditCard } from "lucide-react";
+import { Star, Heart, Minus, Plus, ShoppingBag } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -10,7 +11,12 @@ import { ProductViewProps } from "@/types";
 import { cn } from "@/lib/utils";
 import { useWishlist } from "@/hooks/useWishlist";
 import { useCart } from "@/hooks/useCart";
+import { useProductMemory } from "@/hooks/useProductMemory";
 import { logViewItem, logAddToCart } from "@/lib/gtm";
+
+const MobileBuyAction = dynamic(() => import("./MobileBuyAction"), {
+    ssr: false,
+});
 
 /**
  * The main product detail view component.
@@ -21,32 +27,29 @@ export function ProductView({ product, reviewStats }: ProductViewProps) {
     const [qty, setQty] = useState(1);
     const [activeImg, setActiveImg] = useState(product.featuredImage || (product.images && product.images[0]));
     const [isOverlayVisible, setIsOverlayVisible] = useState(true);
+    const [showSpecs, setShowSpecs] = useState(false);
 
     useEffect(() => {
-        const handleScroll = () => {
-            const buyBox = document.getElementById("pdp-buy-box");
-            if (buyBox) {
-                const rect = buyBox.getBoundingClientRect();
-                // If the top of the Buy Box has scrolled past 60px from the top of the screen,
-                // it means the user has reached it or scrolled past/under it, so we hide the overlay.
-                // Otherwise (when the scroll position is above the Buy Box), we show it!
-                if (rect.top > 60) {
-                    setIsOverlayVisible(true);
-                } else {
-                    setIsOverlayVisible(false);
-                }
-            } else {
-                setIsOverlayVisible(true);
+        const buyBox = document.getElementById("pdp-buy-box");
+        if (!buyBox) return;
+
+        const observer = new IntersectionObserver(
+            ([entry]) => {
+                // If the buy box is not intersecting (meaning it's out of view or partially out)
+                // we want to show the overlay. We use a threshold of 0.1 to show it when mostly gone.
+                // But specifically we want to know if it's ABOVE the viewport.
+                // intersectionRatio < 1 means it's partially hidden.
+                // We use boundingClientRect.top to determine if it's below the header (60px)
+                setIsOverlayVisible(entry.boundingClientRect.top > 60);
+            },
+            {
+                threshold: [0, 1],
+                rootMargin: "-60px 0px 0px 0px"
             }
-        };
+        );
 
-        window.addEventListener("scroll", handleScroll, { passive: true });
-        // Check immediately on mount/load
-        handleScroll();
-
-        return () => {
-            window.removeEventListener("scroll", handleScroll);
-        };
+        observer.observe(buyBox);
+        return () => observer.disconnect();
     }, []);
 
     // Consolidate unique images: Featured + Gallery (Variant images hidden here as requested)
@@ -73,15 +76,25 @@ export function ProductView({ product, reviewStats }: ProductViewProps) {
 
     const { toggleWishlist, isInWishlist } = useWishlist();
     const { addToCart, cart = [], setIsCartOpen } = useCart();
+    const { saveToMemory } = useProductMemory();
+
+    // Cache product in memory once viewed
+    useEffect(() => {
+        saveToMemory(product);
+    }, [product, saveToMemory]);
     const isWishlisted = isInWishlist(product._id);
 
     const isAlreadyInCart = !!(cart && Array.isArray(cart) && cart.some(
         (item) => item.productId === product._id && item.variationIdx === selectedIdx
     ));
 
-    // Google Tag: view_item
+    // Google Tag: view_item - Defer to prevent hydration blocking
     useEffect(() => {
-        logViewItem(product);
+        if ("requestIdleCallback" in window) {
+            (window as any).requestIdleCallback(() => logViewItem(product));
+        } else {
+            setTimeout(() => logViewItem(product), 500);
+        }
     }, [product]);
 
     const handleAddToCart = () => {
@@ -130,55 +143,10 @@ export function ProductView({ product, reviewStats }: ProductViewProps) {
 
     return (
         <section className="flex flex-col md:flex-row gap-2.5 md:gap-8 lg:gap-10 mb-8 md:mb-12 px-0 md:px-0 pb-24 md:pb-0">
-            {/* JSON-LD Schema for Rich Results */}
-            <script
-                type="application/ld+json"
-                dangerouslySetInnerHTML={{
-                    __html: JSON.stringify({
-                        "@context": "https://schema.org",
-                        "@type": "Product",
-                        "name": product.name,
-                        "image": allGalleryImages,
-                        "description": product.seoDescription || product.name,
-                        "sku": activeVariation?.sku || product.skuPrefix,
-                        "brand": {
-                            "@type": "Brand",
-                            "name": product.brand && typeof product.brand !== 'string' ? (product.brand as any).name : "Salaf"
-                        },
-                        "aggregateRating": reviewStats.totalReviews > 0 ? {
-                            "@type": "AggregateRating",
-                            "ratingValue": Number(reviewStats.avgRating.toFixed(1)),
-                            "reviewCount": reviewStats.totalReviews,
-                            "bestRating": "5",
-                            "worstRating": "1"
-                        } : undefined,
-                        "offers": {
-                            "@type": "AggregateOffer",
-                            "priceCurrency": "BDT",
-                            "lowPrice": (product.variations && product.variations.length > 0) ? Math.min(...product.variations.map((v: any) => Number(v.salePrice || v.basePrice))) : 0,
-                            "highPrice": (product.variations && product.variations.length > 0) ? Math.max(...product.variations.map((v: any) => Number(v.salePrice || v.basePrice))) : 0,
-                            "offerCount": product.variations?.length || 0,
-                            "offers": product.variations?.map((v: any) => ({
-                                "@type": "Offer",
-                                "price": Number(v.salePrice || v.basePrice),
-                                "priceCurrency": "BDT",
-                                "availability": v.stock !== undefined && Number(v.stock) > 0 ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
-                                "sku": v.sku,
-                                "priceValidUntil": "2027-12-31"
-                            })) || []
-                        },
-                        "additionalProperty": product.attributes?.map((attr: any) => ({
-                            "@type": "PropertyValue",
-                            "name": attr.key,
-                            "value": attr.value
-                        }))
-                    })
-                }}
-            />
-            
             {/* Left: Product Gallery */}
             <div className="w-full md:w-1/2 flex flex-col gap-2 md:gap-4">
                 <div className="relative w-full h-[380px] sm:h-[440px] md:h-[480px] overflow-hidden group rounded-none md:rounded-2xl bg-[#AC8717]/10 border-y md:border border-[#AC8717]/20">
+                    {/* Lazy-load the blurred background to prioritize the main image */}
                     <Image
                         src={activeImg}
                         alt=""
@@ -186,6 +154,7 @@ export function ProductView({ product, reviewStats }: ProductViewProps) {
                         className="object-cover scale-110 blur-2xl opacity-45 md:hidden"
                         sizes="100vw"
                         aria-hidden="true"
+                        loading="lazy"
                     />
                     <div className="absolute inset-0 bg-white/55 md:hidden" aria-hidden="true" />
                     <Image
@@ -435,90 +404,46 @@ export function ProductView({ product, reviewStats }: ProductViewProps) {
                     </div>
                 </div>
 
-                {/* Specifications Table */}
+        {/* Specifications Table - Defer rendering until after initial mount */}
                 {product.attributes && product.attributes.length > 0 && (
                     <div className="border-t border-border/40 pt-4 mt-2">
-                        <h3 className="text-[10px] uppercase font-bold tracking-widest text-muted-foreground mb-2">Product Specifications</h3>
-                        <div className="bg-muted/10 rounded-xl border border-border/40 overflow-hidden">
-                            <table className="w-full text-xs text-left">
-                                <tbody>
-                                    {product.attributes.map((attr: any, idx: number) => (
-                                        <tr key={idx} className={cn("border-b border-border/30 last:border-0", idx % 2 === 0 ? "bg-muted/5" : "bg-transparent")}>
-                                            <td className="px-3 py-2 font-semibold text-muted-foreground w-1/3 border-r border-border/30">{attr.key}</td>
-                                            <td className="px-3 py-2 text-foreground font-medium">{attr.value}</td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
-                        </div>
+                <button
+                    onClick={() => setShowSpecs(!showSpecs)}
+                    className="flex items-center justify-between w-full text-[10px] uppercase font-bold tracking-widest text-muted-foreground mb-2 hover:text-[#AC8717] transition-colors"
+                >
+                    <span>Product Specifications</span>
+                    <span className="text-[8px]">{showSpecs ? "− Hide" : "+ Show Details"}</span>
+                </button>
+                {showSpecs && (
+                    <div className="bg-muted/10 rounded-xl border border-border/40 overflow-hidden animate-in fade-in slide-in-from-top-1 duration-300">
+                        <table className="w-full text-xs text-left">
+                            <tbody>
+                                {product.attributes.map((attr: any, idx: number) => (
+                                    <tr key={idx} className={cn("border-b border-border/30 last:border-0", idx % 2 === 0 ? "bg-muted/5" : "bg-transparent")}>
+                                        <td className="px-3 py-2 font-semibold text-muted-foreground w-1/3 border-r border-border/30">{attr.key}</td>
+                                        <td className="px-3 py-2 text-foreground font-medium">{attr.value}</td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                )}
                     </div>
                 )}
             </div>
 
-            {/* Sticky Bottom Buy/Cart Mobile Overlay */}
-            <div className={cn(
-                "lg:hidden fixed bottom-0 left-0 right-0 z-[90] gold-gradient gold-bevel text-gray-950 px-4 transition-all duration-500 ease-in-out transform shadow-[0_-8px_30px_rgba(172,135,23,0.45)]",
-                isOverlayVisible ? "translate-y-0 opacity-100" : "translate-y-full opacity-0 pointer-events-none"
-            )}
-            style={{ 
-                paddingTop: "8px",
-                paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 10px)"
-            }}
-            >
-                <div className="flex items-center justify-between gap-3 w-full">
-                    {/* Product Thumbnail & Highly Structured Metadata Info */}
-                    <div className="flex items-center gap-2.5 max-w-[50%] shrink-0">
-                        <div className="w-9 h-9 relative bg-white rounded-lg overflow-hidden border border-black/10 shrink-0 shadow-sm">
-                            <Image
-                                src={activeImg}
-                                alt=""
-                                fill
-                                className="object-cover scale-[1.35]"
-                            />
-                        </div>
-                        <div className="flex flex-col min-w-0">
-                            <span className="text-[10px] font-black text-gray-950 leading-none truncate uppercase font-heading tracking-wide">
-                                {product.name}
-                            </span>
-                            <div className="flex items-center gap-2 mt-1 leading-none text-gray-800">
-                                <span className="text-[8px] font-extrabold uppercase tracking-widest shrink-0 bg-black/5 px-1.5 py-0.5 rounded-sm border border-black/5">
-                                    {activeVariation?.volume}{activeVariation?.volumeUnit}
-                                </span>
-                                <span className="text-gray-800/40 text-[9px] shrink-0">|</span>
-                                <span className="text-[12px] font-black text-gray-950 shrink-0">
-                                    ৳ {price.toLocaleString()}
-                                </span>
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Actions: Add to Cart icon button & Buy Capsule (Transparent Backgrounds) */}
-                    <div className="flex items-center gap-2 flex-1 justify-end">
-                        <button
-                            onClick={handleAddToCart}
-                            disabled={isOutOfStock}
-                            className={cn(
-                                "w-9 h-9 rounded-full flex items-center justify-center shrink-0 transition-all duration-300 cursor-pointer shadow-md bg-black/10 border-t border-t-white/40 border-b border-b-black/30 border-x border-x-black/15 text-gray-950 hover:bg-black/15 active:scale-95",
-                                isOutOfStock && "opacity-50 cursor-not-allowed",
-                                isAlreadyInCart && "bg-green-700/20 border-green-600/30 text-green-800"
-                            )}
-                            title="Add to Cart"
-                        >
-                            <ShoppingBag className="w-3.5 h-3.5" />
-                        </button>
-
-                        {!isOutOfStock && (
-                            <button
-                                onClick={handleBuyNow}
-                                className="h-9 px-4 bg-black/10 hover:bg-black/15 active:scale-[0.98] text-gray-950 font-black text-[9px] uppercase tracking-widest rounded-full transition-all duration-300 flex-1 max-w-[120px] flex items-center justify-center cursor-pointer shadow-md border-t border-t-white/40 border-b border-b-black/30 border-x border-x-black/15 gap-1.5"
-                            >
-                                <CreditCard className="w-3.5 h-3.5 shrink-0" />
-                                <span>Buy</span>
-                            </button>
-                        )}
-                    </div>
-                </div>
-            </div>
+            {/* Sticky Bottom Buy/Cart Mobile Overlay - Lazy Loaded */}
+            <MobileBuyAction
+                isVisible={isOverlayVisible}
+                activeImg={activeImg}
+                productName={product.name}
+                volume={`${activeVariation?.volume}${activeVariation?.volumeUnit}`}
+                price={price}
+                isOutOfStock={isOutOfStock}
+                isAlreadyInCart={isAlreadyInCart}
+                onAddToCart={handleAddToCart}
+                onBuyNow={handleBuyNow}
+            />
 
         </section>
     );

@@ -4,12 +4,13 @@ import { cn } from "@/lib/utils";
 import { Star, Heart, ShoppingCart, Zap } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useWishlist } from "@/hooks/useWishlist";
 import { useCart } from "@/hooks/useCart";
+import { useProductMemory } from "@/hooks/useProductMemory";
 import { logSelectItem, logAddToCart } from "@/lib/gtm";
 import { ProductCardProps, IVariation } from "@/types/components.types";
-import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Eye } from "lucide-react";
 import dynamic from "next/dynamic";
@@ -29,8 +30,10 @@ const ProductPreviewModal = dynamic(() => import("@/components/product/ProductPr
 export const ProductCard = ({
     product,
     config = { showPrice: true, showVolume: true },
-    showReviews = true
-}: ProductCardProps) => {
+    showReviews = true,
+    index = 0
+}: ProductCardProps & { index?: number }) => {
+    const router = useRouter();
     const [isPreviewOpen, setIsPreviewOpen] = useState(false);
     const { toggleWishlist, isInWishlist } = useWishlist();
     const isWishlisted = isInWishlist(product._id);
@@ -38,6 +41,14 @@ export const ProductCard = ({
     const hasSaleTrigger = product.variations?.some((v: IVariation) => v.salePrice && v.salePrice < v.basePrice);
 
     const { addToCart, cart = [], setIsCartOpen } = useCart();
+    const { saveToMemory, prefetchImage } = useProductMemory();
+
+    const handleMouseEnter = () => {
+        // Prefetch metadata and primary image to local cache on hover
+        saveToMemory(product);
+        const mainImg = product.featuredImage || (product.images && product.images[0]);
+        if (mainImg) prefetchImage(mainImg);
+    };
 
     const handleQuickAdd = (e: React.MouseEvent) => {
         e.preventDefault();
@@ -172,17 +183,15 @@ export const ProductCard = ({
             {/* ═══════════════════════════════════════════════════════════
                 DESKTOP VERSION — luxury rounded card (lg and above)
             ════════════════════════════════════════════════════════════ */}
-            <motion.div
-                initial={{ opacity: 0, y: 15 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, ease: "easeOut" }}
-                whileHover={{ y: -6, transition: { duration: 0.2 } }}
-                className={cn("hidden lg:flex flex-col rounded-[2rem] overflow-hidden transition-all duration-700 bg-white group cursor-pointer h-full w-full max-w-[320px] mx-auto shrink-0 relative border border-black/5 shadow-sm hover:shadow-xl hover:shadow-black/10")}
+            <div
+                onMouseEnter={handleMouseEnter}
+                className={cn("hidden lg:flex flex-col rounded-[2rem] overflow-hidden transition-all duration-500 bg-white group cursor-pointer h-full w-full max-w-[320px] mx-auto shrink-0 relative border border-black/5 shadow-sm hover:shadow-xl hover:shadow-black/10 hover:-translate-y-1.5")}
             >
                 {/* Entire Card Absolute Overlay Link for Instant Navigation on Desktop */}
                 <Link
                     href={`/product/${product.slug}`}
                     onClick={handleClick}
+                    onTouchStart={() => router.prefetch(`/product/${product.slug}`)}
                     className="absolute inset-0 z-10"
                     aria-label={product.name}
                 />
@@ -210,30 +219,26 @@ export const ProductCard = ({
 
                     {/* Top Actions Overlay */}
                     <div className={cn("absolute top-6 right-6 z-20 flex flex-col gap-3 transition-all duration-500", "opacity-0 translate-x-4 group-hover:opacity-100 group-hover:translate-x-0")}>
-                        <motion.button
-                            whileHover={{ scale: 1.15 }}
-                            whileTap={{ scale: 0.9 }}
+                        <button
                             onClick={(e) => {
                                 e.preventDefault();
                                 e.stopPropagation();
                                 setIsPreviewOpen(true);
                             }}
-                            className="w-10 h-10 rounded-full bg-white/90 backdrop-blur-md flex items-center justify-center text-foreground shadow-lg hover:text-bprimary-dark transition-all cursor-pointer"
+                            className="w-10 h-10 rounded-full bg-white/90 backdrop-blur-md flex items-center justify-center text-foreground shadow-lg hover:text-bprimary-dark transition-all hover:scale-110 active:scale-95 cursor-pointer"
                         >
                             <Eye className="w-5 h-5" />
-                        </motion.button>
-                        <motion.button
-                            whileHover={{ scale: 1.15 }}
-                            whileTap={{ scale: 0.9 }}
+                        </button>
+                        <button
                             onClick={(e) => {
                                 e.preventDefault();
                                 e.stopPropagation();
                                 toggleWishlist(product._id);
                             }}
-                            className={cn("w-10 h-10 rounded-full bg-white/90 backdrop-blur-md flex items-center justify-center shadow-lg transition-all cursor-pointer", isWishlisted ? "text-red-500" : "text-foreground hover:text-red-500")}
+                            className={cn("w-10 h-10 rounded-full bg-white/90 backdrop-blur-md flex items-center justify-center shadow-lg transition-all hover:scale-110 active:scale-95 cursor-pointer", isWishlisted ? "text-red-500" : "text-foreground hover:text-red-500")}
                         >
                             <Heart className={cn("w-5 h-5", isWishlisted && "fill-current")} />
-                        </motion.button>
+                        </button>
                     </div>
 
                     {/* Desktop Hover Button */}
@@ -266,7 +271,7 @@ export const ProductCard = ({
                         </div>
                     </div>
                 </div>
-            </motion.div>
+            </div>
 
             {/* ═══════════════════════════════════════════════════════════
                 MOBILE VERSION — Amazon / croynow.com style
@@ -275,10 +280,9 @@ export const ProductCard = ({
                 ▸ No empty white space — info sits flush below image
                 ▸ Compact action row at bottom
             ════════════════════════════════════════════════════════════ */}
-            <motion.div
-                whileTap={{ scale: 0.96 }}
-                transition={{ type: "spring", stiffness: 420, damping: 28 }}
-                className="flex lg:hidden flex-col w-full bg-white overflow-hidden border border-[#ebe3d4] relative group cursor-pointer shadow-[0_1px_2px_rgba(41,30,18,0.04)] hover:shadow-[0_4px_12px_rgba(41,30,18,0.1)] active:bg-amber-50/40 transition-colors"
+            <div
+                onMouseEnter={handleMouseEnter}
+                className="flex lg:hidden flex-col w-full bg-white overflow-hidden border border-[#ebe3d4] relative group cursor-pointer shadow-[0_1px_2px_rgba(41,30,18,0.04)] hover:shadow-[0_4px_12px_rgba(41,30,18,0.1)] active:bg-amber-50/40 active:scale-[0.98] active:brightness-95 transition-all duration-300"
             >
                 {/* Entire Card Absolute Overlay Link for Instant Navigation on Mobile */}
                 <Link
@@ -299,7 +303,8 @@ export const ProductCard = ({
                         fill
                         className="object-cover relative z-10 transition-transform duration-300 group-hover:scale-105"
                         sizes="(max-width: 640px) 50vw, 33vw"
-                        priority
+                        priority={index < 4}
+                        loading={index < 4 ? "eager" : "lazy"}
                     />
 
                     {/* Sale badge — top-left, sharp */}
@@ -370,7 +375,7 @@ export const ProductCard = ({
                         </button>
                     </div>
                 </div>
-            </motion.div>
+            </div>
 
             {isPreviewOpen && (
                 <ProductPreviewModal

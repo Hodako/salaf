@@ -22,20 +22,21 @@ export function CollapsibleStory({ children, threshold = 600 }: CollapsibleStory
     const [shouldShowButton, setShouldShowButton] = useState(false);
     const contentRef = useRef<HTMLDivElement>(null);
 
-    // Initial check and re-check on content updates
+    // Initial check and re-check on content updates using ResizeObserver for better performance
     useEffect(() => {
-        const checkHeight = () => {
-            if (contentRef.current) {
-                // We add a tiny buffer to avoid showing button for items that are only slightly over
-                setShouldShowButton(contentRef.current.scrollHeight > threshold + 50);
-            }
-        };
+        if (!contentRef.current) return;
 
-        checkHeight();
-        // Recalculate on window resize
-        window.addEventListener('resize', checkHeight);
-        return () => window.removeEventListener('resize', checkHeight);
-    }, [children, threshold]);
+        const observer = new ResizeObserver((entries) => {
+            for (let entry of entries) {
+                // Use scrollHeight to detect if content is overflowing the threshold
+                const target = entry.target as HTMLDivElement;
+                setShouldShowButton(target.scrollHeight > threshold + 50);
+            }
+        });
+
+        observer.observe(contentRef.current);
+        return () => observer.disconnect();
+    }, [threshold]);
 
     // If content is short, just render it normally
     if (!shouldShowButton && !isExpanded) {
