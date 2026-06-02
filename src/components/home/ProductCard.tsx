@@ -300,12 +300,10 @@ export const ProductCard = ({
                 ▸ No empty white space — info sits flush below image
                 ▸ Compact action row at bottom
             ════════════════════════════════════════════════════════════ */}
-            <motion.div
-                whileTap={{ scale: 0.96 }}
-                transition={{ type: "spring", stiffness: 420, damping: 28 }}
+            <div
                 onMouseEnter={handlePrefetch}
                 onFocusCapture={handlePrefetch}
-                className="flex lg:hidden flex-col w-full bg-white overflow-hidden border border-[#ebe3d4] relative group cursor-pointer shadow-[0_1px_2px_rgba(41,30,18,0.04)] hover:shadow-[0_4px_12px_rgba(41,30,18,0.1)] active:bg-amber-50/40 transition-colors"
+                className="flex lg:hidden flex-col w-full bg-white overflow-hidden border border-[#ebe3d4] relative group cursor-pointer shadow-[0_1px_2px_rgba(41,30,18,0.04)] active:bg-amber-50/40 transition-colors"
             >
                 {/* Entire Card Absolute Overlay Link for Instant Navigation on Mobile */}
                 <Link
@@ -317,14 +315,14 @@ export const ProductCard = ({
 
                 {/* ── Full-bleed Image ── */}
                 <div
-                    className="relative block w-full overflow-hidden bg-white"
+                    className="relative block w-full overflow-hidden bg-white z-0"
                     style={{ aspectRatio: "1 / 1.06" }}
                 >
                     <Image
                         src={product.featuredImage || product.images[0]}
                         alt={product.name}
                         fill
-                        className="object-cover relative z-10 transition-transform duration-300 group-hover:scale-105"
+                        className="object-cover transition-transform duration-300"
                         sizes="(max-width: 640px) 50vw, 33vw"
                         priority
                     />
@@ -397,7 +395,7 @@ export const ProductCard = ({
                         </button>
                     </div>
                 </div>
-            </motion.div>
+            </div>
 
             {isPreviewOpen && (
                 <ProductPreviewModal
