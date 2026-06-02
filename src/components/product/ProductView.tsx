@@ -88,9 +88,13 @@ export function ProductView({ product, reviewStats }: ProductViewProps) {
         (item) => item.productId === product._id && item.variationIdx === selectedIdx
     ));
 
-    // Google Tag: view_item
+    // Google Tag: view_item - Defer to prevent hydration blocking
     useEffect(() => {
-        logViewItem(product);
+        if ("requestIdleCallback" in window) {
+            (window as any).requestIdleCallback(() => logViewItem(product));
+        } else {
+            setTimeout(() => logViewItem(product), 500);
+        }
     }, [product]);
 
     const handleAddToCart = () => {

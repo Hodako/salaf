@@ -4,13 +4,13 @@ import { cn } from "@/lib/utils";
 import { Star, Heart, ShoppingCart, Zap } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useWishlist } from "@/hooks/useWishlist";
 import { useCart } from "@/hooks/useCart";
 import { useProductMemory } from "@/hooks/useProductMemory";
 import { logSelectItem, logAddToCart } from "@/lib/gtm";
 import { ProductCardProps, IVariation } from "@/types/components.types";
-import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Eye } from "lucide-react";
 import dynamic from "next/dynamic";
@@ -33,6 +33,7 @@ export const ProductCard = ({
     showReviews = true,
     index = 0
 }: ProductCardProps & { index?: number }) => {
+    const router = useRouter();
     const [isPreviewOpen, setIsPreviewOpen] = useState(false);
     const { toggleWishlist, isInWishlist } = useWishlist();
     const isWishlisted = isInWishlist(product._id);
@@ -182,17 +183,15 @@ export const ProductCard = ({
             {/* ═══════════════════════════════════════════════════════════
                 DESKTOP VERSION — luxury rounded card (lg and above)
             ════════════════════════════════════════════════════════════ */}
-            <motion.div
-                initial={{ opacity: 0, y: 15 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, ease: "easeOut" }}
-                whileHover={{ y: -6, transition: { duration: 0.2 } }}
-                className={cn("hidden lg:flex flex-col rounded-[2rem] overflow-hidden transition-all duration-700 bg-white group cursor-pointer h-full w-full max-w-[320px] mx-auto shrink-0 relative border border-black/5 shadow-sm hover:shadow-xl hover:shadow-black/10")}
+            <div
+                onMouseEnter={handleMouseEnter}
+                className={cn("hidden lg:flex flex-col rounded-[2rem] overflow-hidden transition-all duration-500 bg-white group cursor-pointer h-full w-full max-w-[320px] mx-auto shrink-0 relative border border-black/5 shadow-sm hover:shadow-xl hover:shadow-black/10 hover:-translate-y-1.5")}
             >
                 {/* Entire Card Absolute Overlay Link for Instant Navigation on Desktop */}
                 <Link
                     href={`/product/${product.slug}`}
                     onClick={handleClick}
+                    onTouchStart={() => router.prefetch(`/product/${product.slug}`)}
                     className="absolute inset-0 z-10"
                     aria-label={product.name}
                 />
@@ -220,30 +219,26 @@ export const ProductCard = ({
 
                     {/* Top Actions Overlay */}
                     <div className={cn("absolute top-6 right-6 z-20 flex flex-col gap-3 transition-all duration-500", "opacity-0 translate-x-4 group-hover:opacity-100 group-hover:translate-x-0")}>
-                        <motion.button
-                            whileHover={{ scale: 1.15 }}
-                            whileTap={{ scale: 0.9 }}
+                        <button
                             onClick={(e) => {
                                 e.preventDefault();
                                 e.stopPropagation();
                                 setIsPreviewOpen(true);
                             }}
-                            className="w-10 h-10 rounded-full bg-white/90 backdrop-blur-md flex items-center justify-center text-foreground shadow-lg hover:text-bprimary-dark transition-all cursor-pointer"
+                            className="w-10 h-10 rounded-full bg-white/90 backdrop-blur-md flex items-center justify-center text-foreground shadow-lg hover:text-bprimary-dark transition-all hover:scale-110 active:scale-95 cursor-pointer"
                         >
                             <Eye className="w-5 h-5" />
-                        </motion.button>
-                        <motion.button
-                            whileHover={{ scale: 1.15 }}
-                            whileTap={{ scale: 0.9 }}
+                        </button>
+                        <button
                             onClick={(e) => {
                                 e.preventDefault();
                                 e.stopPropagation();
                                 toggleWishlist(product._id);
                             }}
-                            className={cn("w-10 h-10 rounded-full bg-white/90 backdrop-blur-md flex items-center justify-center shadow-lg transition-all cursor-pointer", isWishlisted ? "text-red-500" : "text-foreground hover:text-red-500")}
+                            className={cn("w-10 h-10 rounded-full bg-white/90 backdrop-blur-md flex items-center justify-center shadow-lg transition-all hover:scale-110 active:scale-95 cursor-pointer", isWishlisted ? "text-red-500" : "text-foreground hover:text-red-500")}
                         >
                             <Heart className={cn("w-5 h-5", isWishlisted && "fill-current")} />
-                        </motion.button>
+                        </button>
                     </div>
 
                     {/* Desktop Hover Button */}
@@ -276,7 +271,7 @@ export const ProductCard = ({
                         </div>
                     </div>
                 </div>
-            </motion.div>
+            </div>
 
             {/* ═══════════════════════════════════════════════════════════
                 MOBILE VERSION — Amazon / croynow.com style
