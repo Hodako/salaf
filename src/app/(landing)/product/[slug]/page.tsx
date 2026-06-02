@@ -163,6 +163,58 @@ export default async function ProductPage({ params }: ProductPageProps) {
     ]
   };
 
+  const prices = (product.variations || []).map((v: any) => v.salePrice || v.basePrice).filter(Boolean);
+  const lowPrice = prices.length > 0 ? Math.min(...prices) : 0;
+  const highPrice = prices.length > 0 ? Math.max(...prices) : 0;
+
+  const offersSchema = (product.variations || []).length > 1 ? {
+      "@type": "AggregateOffer",
+      "url": `https://salaf.bd/product/${product.slug}`,
+      "priceCurrency": "BDT",
+      "lowPrice": lowPrice,
+      "highPrice": highPrice,
+      "offerCount": product.variations.length,
+      "priceValidUntil": "2027-12-31",
+      "availability": product.variations.some((v: any) => (v?.stock ?? 0) > 0) ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
+  } : (product.variations || []).length === 1 ? {
+      "@type": "Offer",
+      "url": `https://salaf.bd/product/${product.slug}`,
+      "priceCurrency": "BDT",
+      "price": product.variations[0]?.salePrice || product.variations[0]?.basePrice || 0,
+      "itemCondition": "https://schema.org/NewCondition",
+      "availability": (product.variations[0]?.stock ?? 0) > 0 ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
+      "priceValidUntil": "2027-12-31"
+  } : {
+      "@type": "Offer",
+      "url": `https://salaf.bd/product/${product.slug}`,
+      "priceCurrency": "BDT",
+      "price": 0,
+      "itemCondition": "https://schema.org/NewCondition",
+      "availability": "https://schema.org/InStock",
+      "priceValidUntil": "2027-12-31"
+  };
+
+  const productSchema = {
+      "@context": "https://schema.org",
+      "@type": "Product",
+      "name": product.name,
+      "image": [product.featuredImage, ...(product.images || [])].filter(Boolean),
+      "description": (product as any).seoDescription || (product as any).description || `Experience the luxury of ${product.name} by Salaf — سلف. Crafted for beauty and timeless elegance.`,
+      "sku": product.skuPrefix || product.slug,
+      "brand": {
+          "@type": "Brand",
+          "name": (product.brand as any)?.name || "Salaf - سلف"
+      },
+      "offers": offersSchema,
+      ...(totalReviews > 0 ? {
+          "aggregateRating": {
+              "@type": "AggregateRating",
+              "ratingValue": avgRating,
+              "reviewCount": totalReviews
+          }
+      } : {})
+  };
+
   const faqSchema = {
     "@context": "https://schema.org",
     "@type": "FAQPage",
@@ -179,6 +231,10 @@ export default async function ProductPage({ params }: ProductPageProps) {
   return (
     <main className="bg-background min-h-screen text-foreground pt-2 md:pt-8 pb-8">
       {/* Inject JSON-LD Schema scripts */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(productSchema) }}
+      />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}

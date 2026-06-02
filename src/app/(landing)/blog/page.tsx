@@ -16,10 +16,18 @@ export const metadata: Metadata = {
         canonical: "https://salaf.bd/blog",
     },
     openGraph: {
-        title: "Scent Diaries | Salaf Fragrance Blog",
-        description: "Artisanal Perfume Guides, Layering Tutorials & Oud Comparisons.",
+        title: "Scent Diaries | Premium Perfume & Attar Blog | Salaf - سلف",
+        description: "Explore perfume buying guides, Attar layering tutorials, fragrance comparisons, and secrets to attar longevity on Scent Diaries.",
         type: "website",
         url: "https://salaf.bd/blog",
+        images: [{ url: "/og-image.png", alt: "Salaf Scent Diaries Blog" }],
+        siteName: "Salaf - سلف"
+    },
+    twitter: {
+        card: "summary_large_image",
+        title: "Scent Diaries | Premium Perfume & Attar Blog | Salaf - سلف",
+        description: "Explore perfume buying guides, Attar layering tutorials, and secrets to attar longevity.",
+        images: ["/og-image.png"]
     }
 };
 
@@ -301,8 +309,21 @@ export default async function BlogIndexPage({ searchParams }: BlogPageProps) {
 
     const currentTab = filterType || "";
 
+    const breadcrumbSchema = {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+            { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://salaf.bd" },
+            { "@type": "ListItem", "position": 2, "name": "Scent Diaries", "item": "https://salaf.bd/blog" }
+        ]
+    };
+
     return (
         <main className="min-h-screen bg-background text-foreground pt-4 md:pt-24 pb-20 overflow-x-hidden">
+            <script
+                type="application/ld+json"
+                dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
+            />
             <div className="container mx-auto px-4 md:px-6">
                 
                 {/* Accessible Breadcrumbs */}
