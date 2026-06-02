@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useLayoutEffect, useMemo, useState } from "react";
 import { usePathname } from "next/navigation";
 
 type ProductPreview = {
@@ -22,6 +22,12 @@ export function ProductRouteLoading() {
     const pathname = usePathname();
     const slug = useMemo(() => pathname?.split("/product/")[1]?.split("/")[0] || "", [pathname]);
     const [preview, setPreview] = useState<ProductPreview | null>(null);
+
+    useLayoutEffect(() => {
+        window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+        document.documentElement.scrollTop = 0;
+        document.body.scrollTop = 0;
+    }, [slug]);
 
     useEffect(() => {
         if (!slug) return;

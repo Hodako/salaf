@@ -76,6 +76,14 @@ export const ProductCard = ({
         router.prefetch(`/product/${product.slug}`);
     };
 
+    const scrollToProductTop = () => {
+        if (typeof window === "undefined") return;
+
+        window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+        document.documentElement.scrollTop = 0;
+        document.body.scrollTop = 0;
+    };
+
     const handleQuickAdd = (e: React.MouseEvent) => {
         e.preventDefault();
         e.stopPropagation();
@@ -182,6 +190,7 @@ export const ProductCard = ({
 
     const handleClick = () => {
         cacheProductPreview();
+        scrollToProductTop();
         logSelectItem(product, config.listName || "Product List");
     };
 
