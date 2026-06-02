@@ -51,19 +51,18 @@ export default async function ProductPage({ params }: ProductPageProps) {
   await dbConnect();
   const { slug } = await params;
 
-  const product = await Product.findOne({ slug }).populate("collections tags brand").lean();
+  // Parallelize critical data fetching
+  const [product, template] = await Promise.all([
+    Product.findOne({ slug }).populate("collections tags brand").lean(),
+    Page.findOne({ type: 'product_template', status: 'published' }).sort({ updatedAt: -1 }).lean().catch(() => null)
+  ]);
+
   if (!product) {
     notFound();
   }
 
   // Fetch minimal review stats for initial load
   const reviewStats = await getReviewStats(product._id as any);
-
-  // Fetch Custom Product Template if exists
-  let template = null;
-  try {
-    template = await Page.findOne({ type: 'product_template', status: 'published' }).sort({ updatedAt: -1 }).lean() as any;
-  } catch (e) {}
 
   // Sanitize for Client Components (JSON serializable only)
   const productData = JSON.parse(JSON.stringify(product));
@@ -134,6 +133,46 @@ export default async function ProductPage({ params }: ProductPageProps) {
     }))
   };
 
+  const productSchema = {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    "name": product.name,
+    "image": [product.featuredImage, ...(product.images || [])],
+    "description": product.seoDescription || product.name,
+    "sku": product.skuPrefix,
+    "brand": {
+      "@type": "Brand",
+      "name": product.brand && typeof product.brand !== 'string' ? (product.brand as any).name : "Salaf"
+    },
+    "aggregateRating": reviewStats.totalReviews > 0 ? {
+      "@type": "AggregateRating",
+      "ratingValue": Number(reviewStats.avgRating.toFixed(1)),
+      "reviewCount": reviewStats.totalReviews,
+      "bestRating": "5",
+      "worstRating": "1"
+    } : undefined,
+    "offers": {
+      "@type": "AggregateOffer",
+      "priceCurrency": "BDT",
+      "lowPrice": (product.variations && product.variations.length > 0) ? Math.min(...product.variations.map((v: any) => Number(v.salePrice || v.basePrice))) : 0,
+      "highPrice": (product.variations && product.variations.length > 0) ? Math.max(...product.variations.map((v: any) => Number(v.salePrice || v.basePrice))) : 0,
+      "offerCount": product.variations?.length || 0,
+      "offers": product.variations?.map((v: any) => ({
+        "@type": "Offer",
+        "price": Number(v.salePrice || v.basePrice),
+        "priceCurrency": "BDT",
+        "availability": v.stock !== undefined && Number(v.stock) > 0 ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
+        "sku": v.sku,
+        "priceValidUntil": "2027-12-31"
+      })) || []
+    },
+    "additionalProperty": product.attributes?.map((attr: any) => ({
+      "@type": "PropertyValue",
+      "name": attr.key,
+      "value": attr.value
+    }))
+  };
+
   return (
     <main className="bg-background min-h-screen text-foreground pt-2 md:pt-8 pb-8">
       {/* Inject JSON-LD Schema scripts */}
@@ -144,6 +183,10 @@ export default async function ProductPage({ params }: ProductPageProps) {
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(productSchema) }}
       />
 
       <div className="container mx-auto px-0 md:px-6">
@@ -170,8 +213,10 @@ export default async function ProductPage({ params }: ProductPageProps) {
           reviewStats={reviewStats}
         />
 
-        {/* Secondary Info: Story Sections */}
-        <ProductStory sections={productData.detailsSections} />
+        {/* Secondary Info: Story Sections - Streamed */}
+        <Suspense fallback={<div className="h-64 animate-pulse bg-muted rounded-2xl mt-8" />}>
+          <ProductStory sections={productData.detailsSections} />
+        </Suspense>
 
         {/* Review Section - Streamed */}
         <Suspense fallback={
