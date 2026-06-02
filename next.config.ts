@@ -18,6 +18,9 @@ const nextConfig: NextConfig = {
     inlineCss: true,
     webVitalsAttribution: ['CLS', 'LCP', 'FID', 'INP', 'TTFB', 'FCP'],
   },
+  turbopack: {
+    root: process.cwd(),
+  },
   poweredByHeader: false,
   images: {
     remotePatterns: [

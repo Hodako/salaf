@@ -42,7 +42,37 @@ export const ProductCard = ({
 
     const { addToCart, cart = [], setIsCartOpen } = useCart();
 
+    const getPreviewPrice = () => {
+        if (!product.variations || product.variations.length === 0) return "";
+
+        const prices = product.variations
+            .map((v: IVariation) => v.salePrice || v.basePrice)
+            .filter((price: number | undefined): price is number => typeof price === "number");
+
+        if (prices.length === 0) return "";
+
+        const min = Math.min(...prices);
+        const max = Math.max(...prices);
+        return min === max ? `BDT ${min.toLocaleString()}` : `BDT ${min.toLocaleString()} - ${max.toLocaleString()}`;
+    };
+
+    const cacheProductPreview = () => {
+        if (typeof window === "undefined") return;
+
+        try {
+            sessionStorage.setItem(`salaf:product-preview:${product.slug}`, JSON.stringify({
+                name: product.name,
+                image: cardImage,
+                price: getPreviewPrice(),
+                volume: product.variations?.[0] ? `${product.variations[0].volume}${product.variations[0].volumeUnit}` : undefined,
+                expiresAt: Date.now() + 10 * 60 * 1000,
+            }));
+        } catch {
+        }
+    };
+
     const handlePrefetch = () => {
+        cacheProductPreview();
         router.prefetch(`/product/${product.slug}`);
     };
 
@@ -151,6 +181,7 @@ export const ProductCard = ({
     const hasMultipleVariants = (product.variations || []).length > 1;
 
     const handleClick = () => {
+        cacheProductPreview();
         logSelectItem(product, config.listName || "Product List");
     };
 

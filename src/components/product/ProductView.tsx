@@ -17,9 +17,10 @@ import { logViewItem, logAddToCart } from "@/lib/gtm";
  */
 export function ProductView({ product, reviewStats }: ProductViewProps) {
     const router = useRouter();
+    const primaryImage = product.featuredImage || product.images?.[0] || "/logo.png";
     const [selectedIdx, setSelectedIdx] = useState<number>(0);
     const [qty, setQty] = useState(1);
-    const [activeImg, setActiveImg] = useState(product.featuredImage || (product.images && product.images[0]));
+    const [activeImg, setActiveImg] = useState(primaryImage);
     const [isOverlayVisible, setIsOverlayVisible] = useState(true);
 
     useEffect(() => {
@@ -56,16 +57,6 @@ export function ProductView({ product, reviewStats }: ProductViewProps) {
         product.images?.forEach(img => set.add(img));
         return Array.from(set);
     }, [product.featuredImage, product.images]);
-
-    // Update active image when variation with specific image is selected
-    useEffect(() => {
-        const variationImage = product.variations[selectedIdx]?.image;
-        if (variationImage) {
-            setActiveImg(variationImage);
-        }
-    }, [selectedIdx, product.variations]);
-
-
 
     const activeVariation = (product.variations && product.variations[selectedIdx]) || null;
     const isOutOfStock = !!(activeVariation && activeVariation.stock !== undefined && Number(activeVariation.stock) <= 0);
@@ -280,7 +271,10 @@ export function ProductView({ product, reviewStats }: ProductViewProps) {
                         {product.variations.map((v: any, i: number) => (
                             <button
                                 key={i}
-                                onClick={() => setSelectedIdx(i)}
+                                onClick={() => {
+                                    setSelectedIdx(i);
+                                    setActiveImg(v.image || primaryImage);
+                                }}
                                 className={cn(
                                     "flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-1.5 rounded-lg sm:rounded-xl border text-[10px] sm:text-xs font-bold uppercase tracking-wider transition-all duration-300 bg-background",
                                     selectedIdx === i
