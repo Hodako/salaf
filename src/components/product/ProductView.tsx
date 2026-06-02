@@ -26,6 +26,7 @@ export function ProductView({ product, reviewStats }: ProductViewProps) {
     const [qty, setQty] = useState(1);
     const [activeImg, setActiveImg] = useState(product.featuredImage || (product.images && product.images[0]));
     const [isOverlayVisible, setIsOverlayVisible] = useState(true);
+    const [showSpecs, setShowSpecs] = useState(false);
 
     useEffect(() => {
         const buyBox = document.getElementById("pdp-buy-box");
@@ -392,22 +393,30 @@ export function ProductView({ product, reviewStats }: ProductViewProps) {
                     </div>
                 </div>
 
-                {/* Specifications Table */}
+        {/* Specifications Table - Defer rendering until after initial mount */}
                 {product.attributes && product.attributes.length > 0 && (
                     <div className="border-t border-border/40 pt-4 mt-2">
-                        <h3 className="text-[10px] uppercase font-bold tracking-widest text-muted-foreground mb-2">Product Specifications</h3>
-                        <div className="bg-muted/10 rounded-xl border border-border/40 overflow-hidden">
-                            <table className="w-full text-xs text-left">
-                                <tbody>
-                                    {product.attributes.map((attr: any, idx: number) => (
-                                        <tr key={idx} className={cn("border-b border-border/30 last:border-0", idx % 2 === 0 ? "bg-muted/5" : "bg-transparent")}>
-                                            <td className="px-3 py-2 font-semibold text-muted-foreground w-1/3 border-r border-border/30">{attr.key}</td>
-                                            <td className="px-3 py-2 text-foreground font-medium">{attr.value}</td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
-                        </div>
+                <button
+                    onClick={() => setShowSpecs(!showSpecs)}
+                    className="flex items-center justify-between w-full text-[10px] uppercase font-bold tracking-widest text-muted-foreground mb-2 hover:text-[#AC8717] transition-colors"
+                >
+                    <span>Product Specifications</span>
+                    <span className="text-[8px]">{showSpecs ? "− Hide" : "+ Show Details"}</span>
+                </button>
+                {showSpecs && (
+                    <div className="bg-muted/10 rounded-xl border border-border/40 overflow-hidden animate-in fade-in slide-in-from-top-1 duration-300">
+                        <table className="w-full text-xs text-left">
+                            <tbody>
+                                {product.attributes.map((attr: any, idx: number) => (
+                                    <tr key={idx} className={cn("border-b border-border/30 last:border-0", idx % 2 === 0 ? "bg-muted/5" : "bg-transparent")}>
+                                        <td className="px-3 py-2 font-semibold text-muted-foreground w-1/3 border-r border-border/30">{attr.key}</td>
+                                        <td className="px-3 py-2 text-foreground font-medium">{attr.value}</td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                )}
                     </div>
                 )}
             </div>

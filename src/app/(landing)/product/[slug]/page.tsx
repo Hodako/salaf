@@ -214,15 +214,18 @@ export default async function ProductPage({ params }: ProductPageProps) {
         />
 
         {/* Secondary Info: Story Sections - Streamed */}
-        <Suspense fallback={<div className="h-64 animate-pulse bg-muted rounded-2xl mt-8" />}>
+        <Suspense fallback={<div className="h-[400px] animate-pulse bg-muted/20 border border-border/40 rounded-3xl mt-12 mx-auto max-w-7xl" />}>
           <ProductStory sections={productData.detailsSections} />
         </Suspense>
 
         {/* Review Section - Streamed */}
         <Suspense fallback={
-          <div className="mt-8 space-y-4 animate-pulse">
-            <div className="h-8 w-48 bg-muted rounded mx-auto" />
-            <div className="h-32 w-full bg-muted rounded" />
+          <div className="mt-12 space-y-8 animate-pulse max-w-4xl mx-auto">
+            <div className="h-10 w-64 bg-muted/30 rounded-full mx-auto" />
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+               <div className="h-40 bg-muted/20 rounded-2xl md:col-span-1" />
+               <div className="h-40 bg-muted/20 rounded-2xl md:col-span-2" />
+            </div>
           </div>
         }>
           <ReviewsWrapper productId={productData._id} productName={productData.name} />

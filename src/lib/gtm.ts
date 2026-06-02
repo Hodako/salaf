@@ -17,12 +17,21 @@ type GTMEvent = {
  */
 export const pushToDataLayer = (data: GTMEvent) => {
     if (typeof window !== "undefined") {
-        (window as any).dataLayer = (window as any).dataLayer || [];
+        const push = () => {
+            (window as any).dataLayer = (window as any).dataLayer || [];
 
-        if (data.ecommerce) {
-            (window as any).dataLayer.push({ ecommerce: null });
+            if (data.ecommerce) {
+                (window as any).dataLayer.push({ ecommerce: null });
+            }
+            (window as any).dataLayer.push(data);
+        };
+
+        // Defer GTM push to an idle period to keep the main thread clear for user input (INP optimization)
+        if ("requestIdleCallback" in window) {
+            (window as any).requestIdleCallback(() => push(), { timeout: 1000 });
+        } else {
+            setTimeout(push, 50);
         }
-        (window as any).dataLayer.push(data);
     }
 };
 

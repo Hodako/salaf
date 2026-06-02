@@ -29,8 +29,9 @@ const ProductPreviewModal = dynamic(() => import("@/components/product/ProductPr
 export const ProductCard = ({
     product,
     config = { showPrice: true, showVolume: true },
-    showReviews = true
-}: ProductCardProps) => {
+    showReviews = true,
+    index = 0
+}: ProductCardProps & { index?: number }) => {
     const [isPreviewOpen, setIsPreviewOpen] = useState(false);
     const { toggleWishlist, isInWishlist } = useWishlist();
     const isWishlisted = isInWishlist(product._id);
@@ -275,10 +276,8 @@ export const ProductCard = ({
                 ▸ No empty white space — info sits flush below image
                 ▸ Compact action row at bottom
             ════════════════════════════════════════════════════════════ */}
-            <motion.div
-                whileTap={{ scale: 0.96 }}
-                transition={{ type: "spring", stiffness: 420, damping: 28 }}
-                className="flex lg:hidden flex-col w-full bg-white overflow-hidden border border-[#ebe3d4] relative group cursor-pointer shadow-[0_1px_2px_rgba(41,30,18,0.04)] hover:shadow-[0_4px_12px_rgba(41,30,18,0.1)] active:bg-amber-50/40 transition-colors"
+            <div
+                className="flex lg:hidden flex-col w-full bg-white overflow-hidden border border-[#ebe3d4] relative group cursor-pointer shadow-[0_1px_2px_rgba(41,30,18,0.04)] hover:shadow-[0_4px_12px_rgba(41,30,18,0.1)] active:bg-amber-50/40 active:scale-[0.98] active:brightness-95 transition-all duration-300"
             >
                 {/* Entire Card Absolute Overlay Link for Instant Navigation on Mobile */}
                 <Link
@@ -299,7 +298,8 @@ export const ProductCard = ({
                         fill
                         className="object-cover relative z-10 transition-transform duration-300 group-hover:scale-105"
                         sizes="(max-width: 640px) 50vw, 33vw"
-                        priority
+                        priority={index < 4}
+                        loading={index < 4 ? "eager" : "lazy"}
                     />
 
                     {/* Sale badge — top-left, sharp */}
@@ -370,7 +370,7 @@ export const ProductCard = ({
                         </button>
                     </div>
                 </div>
-            </motion.div>
+            </div>
 
             {isPreviewOpen && (
                 <ProductPreviewModal

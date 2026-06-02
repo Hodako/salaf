@@ -20,6 +20,13 @@ describe('gtm utility', () => {
  beforeEach(() => {
  // Mock window.dataLayer
  (window as any).dataLayer = [];
+ // Mock requestIdleCallback
+ vi.stubGlobal('requestIdleCallback', vi.fn((cb) => cb()));
+ vi.useFakeTimers();
+ });
+
+ afterEach(() => {
+ vi.useRealTimers();
  });
 
  afterEach(() => {
@@ -30,11 +37,13 @@ describe('gtm utility', () => {
  it('should push data to window.dataLayer', () => {
  const event = { event: 'test_event' };
  pushToDataLayer(event);
+ vi.runAllTimers();
  expect((window as any).dataLayer).toContain(event);
  });
 
  it('should clear ecommerce before pushing new ecommerce data', () => {
  pushToDataLayer({ event: 'test', ecommerce: { items: [] } });
+ vi.runAllTimers();
  expect((window as any).dataLayer[0]).toEqual({ ecommerce: null });
  expect((window as any).dataLayer[1]).toEqual({ event: 'test', ecommerce: { items: [] } });
  });
@@ -58,6 +67,7 @@ describe('gtm utility', () => {
 
  it('should logViewItemList', () => {
  logViewItemList([mockProduct], 'Category Page');
+ vi.runAllTimers();
  const event = (window as any).dataLayer.find((e: any) => e.event === 'view_item_list');
  expect(event.ecommerce.item_list_name).toBe('Category Page');
  expect(event.ecommerce.items[0].item_id).toBe('123');
@@ -65,6 +75,7 @@ describe('gtm utility', () => {
 
  it('should logViewItem', () => {
  logViewItem(mockProduct);
+ vi.runAllTimers();
  const event = (window as any).dataLayer.find((e: any) => e.event === 'view_item');
  expect(event.ecommerce.items[0].item_id).toBe('123');
  expect(event.value).toBe(100);
@@ -72,12 +83,14 @@ describe('gtm utility', () => {
 
  it('should logAddToWishlist', () => {
  logAddToWishlist(mockProduct);
+ vi.runAllTimers();
  const event = (window as any).dataLayer.find((e: any) => e.event === 'add_to_wishlist');
  expect(event.ecommerce.items[0].item_id).toBe('123');
  });
 
  it('should logAddToCart', () => {
  logAddToCart(mockProduct, { volume: '500ml' }, 2);
+ vi.runAllTimers();
  const event = (window as any).dataLayer.find((e: any) => e.event === 'add_to_cart');
  expect(event.ecommerce.items[0].quantity).toBe(2);
  expect(event.ecommerce.value).toBe(200);
@@ -85,30 +98,35 @@ describe('gtm utility', () => {
 
  it('should logSelectItem', () => {
  logSelectItem(mockProduct, 'Search Results');
+ vi.runAllTimers();
  const event = (window as any).dataLayer.find((e: any) => e.event === 'select_item');
  expect(event.ecommerce.item_list_name).toBe('Search Results');
  });
 
  it('should logSearch', () => {
  logSearch('test query');
+ vi.runAllTimers();
  const event = (window as any).dataLayer.find((e: any) => e.event === 'search');
  expect(event.search_term).toBe('test query');
  });
 
  it('should logLogin', () => {
  logLogin('Email');
+ vi.runAllTimers();
  const event = (window as any).dataLayer.find((e: any) => e.event === 'login');
  expect(event.method).toBe('Email');
  });
 
  it('should logSignUp', () => {
  logSignUp('Google');
+ vi.runAllTimers();
  const event = (window as any).dataLayer.find((e: any) => e.event === 'sign_up');
  expect(event.method).toBe('Google');
  });
 
  it('should logBeginCheckout', () => {
  logBeginCheckout([mockCartItem], 200);
+ vi.runAllTimers();
  const event = (window as any).dataLayer.find((e: any) => e.event === 'begin_checkout');
  expect(event.ecommerce.value).toBe(200);
  expect(event.ecommerce.items[0].item_id).toBe('123');
@@ -116,18 +134,21 @@ describe('gtm utility', () => {
 
  it('should logAddShippingInfo', () => {
  logAddShippingInfo([mockCartItem], 250, 'Express');
+ vi.runAllTimers();
  const event = (window as any).dataLayer.find((e: any) => e.event === 'add_shipping_info');
  expect(event.ecommerce.shipping_tier).toBe('Express');
  });
 
  it('should logAddPaymentInfo', () => {
  logAddPaymentInfo([mockCartItem], 250, 'Credit Card');
+ vi.runAllTimers();
  const event = (window as any).dataLayer.find((e: any) => e.event === 'add_payment_info');
  expect(event.ecommerce.payment_type).toBe('Credit Card');
  });
 
  it('should logViewCart', () => {
  logViewCart([mockCartItem], 200);
+ vi.runAllTimers();
  const event = (window as any).dataLayer.find((e: any) => e.event === 'view_cart');
  expect(event.ecommerce.value).toBe(200);
  });
@@ -148,6 +169,7 @@ describe('gtm utility', () => {
  ]
  };
  logPurchase(mockOrder);
+ vi.runAllTimers();
  const event = (window as any).dataLayer.find((e: any) => e.event === 'purchase');
  expect(event.ecommerce.transaction_id).toBe('order_123');
  expect(event.ecommerce.value).toBe(300);
