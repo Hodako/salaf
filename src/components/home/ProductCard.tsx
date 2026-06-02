@@ -76,14 +76,6 @@ export const ProductCard = ({
         router.prefetch(`/product/${product.slug}`);
     };
 
-    const scrollToProductTop = () => {
-        if (typeof window === "undefined") return;
-
-        window.scrollTo({ top: 0, left: 0, behavior: "auto" });
-        document.documentElement.scrollTop = 0;
-        document.body.scrollTop = 0;
-    };
-
     const handleQuickAdd = (e: React.MouseEvent) => {
         e.preventDefault();
         e.stopPropagation();
@@ -190,7 +182,6 @@ export const ProductCard = ({
 
     const handleClick = () => {
         cacheProductPreview();
-        scrollToProductTop();
         logSelectItem(product, config.listName || "Product List");
     };
 
@@ -231,6 +222,7 @@ export const ProductCard = ({
                 {/* Entire Card Absolute Overlay Link for Instant Navigation on Desktop */}
                 <Link
                     href={`/product/${product.slug}`}
+                    scroll
                     onClick={handleClick}
                     className="absolute inset-0 z-10"
                     aria-label={product.name}
@@ -332,6 +324,7 @@ export const ProductCard = ({
                 {/* Entire Card Absolute Overlay Link for Instant Navigation on Mobile */}
                 <Link
                     href={`/product/${product.slug}`}
+                    scroll
                     onClick={handleClick}
                     className="absolute inset-0 z-10"
                     aria-label={product.name}
