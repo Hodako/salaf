@@ -14,6 +14,7 @@ import { Button } from "@/components/ui/button";
 import { Eye } from "lucide-react";
 import dynamic from "next/dynamic";
 import { ShoppingBag } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 const ProductPreviewModal = dynamic(() => import("@/components/product/ProductPreviewModal").then(mod => mod.ProductPreviewModal), {
     ssr: false,
@@ -31,6 +32,7 @@ export const ProductCard = ({
     config = { showPrice: true, showVolume: true },
     showReviews = true
 }: ProductCardProps) => {
+    const router = useRouter();
     const [isPreviewOpen, setIsPreviewOpen] = useState(false);
     const { toggleWishlist, isInWishlist } = useWishlist();
     const isWishlisted = isInWishlist(product._id);
@@ -38,6 +40,27 @@ export const ProductCard = ({
     const hasSaleTrigger = product.variations?.some((v: IVariation) => v.salePrice && v.salePrice < v.basePrice);
 
     const { addToCart, cart = [], setIsCartOpen } = useCart();
+
+    const preloadImage = (src: string) => {
+        if (!src || typeof window === 'undefined') return;
+        const img = new window.Image();
+        img.src = src;
+    };
+
+    const handlePrefetch = () => {
+        // Prefetch the Next.js router data & bundles
+        router.prefetch(`/product/${product.slug}`);
+
+        // Preload the product images into browser cache via Service Worker
+        if (product.featuredImage) {
+            preloadImage(product.featuredImage);
+        }
+        if (product.images && product.images.length > 0) {
+            product.images.slice(0, 3).forEach((img: string) => {
+                preloadImage(img);
+            });
+        }
+    };
 
     const handleQuickAdd = (e: React.MouseEvent) => {
         e.preventDefault();
@@ -177,6 +200,8 @@ export const ProductCard = ({
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, ease: "easeOut" }}
                 whileHover={{ y: -6, transition: { duration: 0.2 } }}
+                onMouseEnter={handlePrefetch}
+                onFocusCapture={handlePrefetch}
                 className={cn("hidden lg:flex flex-col rounded-[2rem] overflow-hidden transition-all duration-700 bg-white group cursor-pointer h-full w-full max-w-[320px] mx-auto shrink-0 relative border border-black/5 shadow-sm hover:shadow-xl hover:shadow-black/10")}
             >
                 {/* Entire Card Absolute Overlay Link for Instant Navigation on Desktop */}
@@ -278,6 +303,8 @@ export const ProductCard = ({
             <motion.div
                 whileTap={{ scale: 0.96 }}
                 transition={{ type: "spring", stiffness: 420, damping: 28 }}
+                onMouseEnter={handlePrefetch}
+                onFocusCapture={handlePrefetch}
                 className="flex lg:hidden flex-col w-full bg-white overflow-hidden border border-[#ebe3d4] relative group cursor-pointer shadow-[0_1px_2px_rgba(41,30,18,0.04)] hover:shadow-[0_4px_12px_rgba(41,30,18,0.1)] active:bg-amber-50/40 transition-colors"
             >
                 {/* Entire Card Absolute Overlay Link for Instant Navigation on Mobile */}
