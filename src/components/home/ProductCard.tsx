@@ -7,6 +7,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { useWishlist } from "@/hooks/useWishlist";
 import { useCart } from "@/hooks/useCart";
+import { useProductMemory } from "@/hooks/useProductMemory";
 import { logSelectItem, logAddToCart } from "@/lib/gtm";
 import { ProductCardProps, IVariation } from "@/types/components.types";
 import { motion } from "framer-motion";
@@ -39,6 +40,14 @@ export const ProductCard = ({
     const hasSaleTrigger = product.variations?.some((v: IVariation) => v.salePrice && v.salePrice < v.basePrice);
 
     const { addToCart, cart = [], setIsCartOpen } = useCart();
+    const { saveToMemory, prefetchImage } = useProductMemory();
+
+    const handleMouseEnter = () => {
+        // Prefetch metadata and primary image to local cache on hover
+        saveToMemory(product);
+        const mainImg = product.featuredImage || (product.images && product.images[0]);
+        if (mainImg) prefetchImage(mainImg);
+    };
 
     const handleQuickAdd = (e: React.MouseEvent) => {
         e.preventDefault();
@@ -277,6 +286,7 @@ export const ProductCard = ({
                 ▸ Compact action row at bottom
             ════════════════════════════════════════════════════════════ */}
             <div
+                onMouseEnter={handleMouseEnter}
                 className="flex lg:hidden flex-col w-full bg-white overflow-hidden border border-[#ebe3d4] relative group cursor-pointer shadow-[0_1px_2px_rgba(41,30,18,0.04)] hover:shadow-[0_4px_12px_rgba(41,30,18,0.1)] active:bg-amber-50/40 active:scale-[0.98] active:brightness-95 transition-all duration-300"
             >
                 {/* Entire Card Absolute Overlay Link for Instant Navigation on Mobile */}

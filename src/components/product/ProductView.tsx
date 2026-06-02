@@ -11,6 +11,7 @@ import { ProductViewProps } from "@/types";
 import { cn } from "@/lib/utils";
 import { useWishlist } from "@/hooks/useWishlist";
 import { useCart } from "@/hooks/useCart";
+import { useProductMemory } from "@/hooks/useProductMemory";
 import { logViewItem, logAddToCart } from "@/lib/gtm";
 
 const MobileBuyAction = dynamic(() => import("./MobileBuyAction"), {
@@ -75,6 +76,12 @@ export function ProductView({ product, reviewStats }: ProductViewProps) {
 
     const { toggleWishlist, isInWishlist } = useWishlist();
     const { addToCart, cart = [], setIsCartOpen } = useCart();
+    const { saveToMemory } = useProductMemory();
+
+    // Cache product in memory once viewed
+    useEffect(() => {
+        saveToMemory(product);
+    }, [product, saveToMemory]);
     const isWishlisted = isInWishlist(product._id);
 
     const isAlreadyInCart = !!(cart && Array.isArray(cart) && cart.some(

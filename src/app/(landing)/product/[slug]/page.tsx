@@ -13,6 +13,23 @@ interface ProductPageProps {
   params: Promise<{ slug: string }>;
 }
 
+// Enable ISR for instant delivery from cache
+export const revalidate = 3600;
+
+// Pre-render the most recent 50 products at build time
+export async function generateStaticParams() {
+  await dbConnect();
+  const products = await Product.find({})
+    .sort({ createdAt: -1 })
+    .limit(50)
+    .select('slug')
+    .lean();
+
+  return products.map((p: any) => ({
+    slug: p.slug,
+  }));
+}
+
 export async function generateMetadata({ params }: ProductPageProps): Promise<Metadata> {
   await dbConnect();
   const { slug } = await params;
@@ -51,18 +68,22 @@ export default async function ProductPage({ params }: ProductPageProps) {
   await dbConnect();
   const { slug } = await params;
 
-  // Parallelize critical data fetching
-  const [product, template] = await Promise.all([
-    Product.findOne({ slug }).populate("collections tags brand").lean(),
-    Page.findOne({ type: 'product_template', status: 'published' }).sort({ updatedAt: -1 }).lean().catch(() => null)
+  // Find product basic details first to get the ID for parallel fetching
+  const initialProduct = await Product.findOne({ slug }).select('_id').lean();
+  if (!initialProduct) {
+    notFound();
+  }
+
+  // Parallelize all data fetching to eliminate sequential DB round-trips
+  const [product, template, reviewStats] = await Promise.all([
+    Product.findById(initialProduct._id).populate("collections tags brand").lean(),
+    Page.findOne({ type: 'product_template', status: 'published' }).sort({ updatedAt: -1 }).lean().catch(() => null),
+    getReviewStats(initialProduct._id as any)
   ]);
 
   if (!product) {
     notFound();
   }
-
-  // Fetch minimal review stats for initial load
-  const reviewStats = await getReviewStats(product._id as any);
 
   // Sanitize for Client Components (JSON serializable only)
   const productData = JSON.parse(JSON.stringify(product));
