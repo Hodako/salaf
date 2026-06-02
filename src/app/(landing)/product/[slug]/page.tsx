@@ -118,7 +118,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
     );
   }
 
-  const productFaqs = [
+  const defaultFaqs = [
     {
       question: `How long does the scent of ${product.name} typically last?`,
       answer: `Due to our high concentration of luxury perfume extracts and artisan craftsmanship, ${product.name} provides outstanding longevity, lasting anywhere from 8 to 24 hours depending on skin type, application, and environment.`
@@ -136,6 +136,9 @@ export default async function ProductPage({ params }: ProductPageProps) {
       answer: `Salaf offers a mixed selection of traditional premium oils (Attars) and standard spray perfumes. Our Pure Attars are 100% alcohol-free concentrated perfume oils, whereas our Spray Perfumes contain high-quality cosmetic-grade perfumer's alcohol for standard diffusion.`
     }
   ];
+
+  const hasCustomFaqs = product.faqs && product.faqs.length > 0;
+  const productFaqs = (hasCustomFaqs ? product.faqs : defaultFaqs) as { question: string; answer: string; }[];
 
   const breadcrumbSchema = {
     "@context": "https://schema.org",
@@ -238,10 +241,12 @@ export default async function ProductPage({ params }: ProductPageProps) {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
       />
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
-      />
+      {product.faqEnabled && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
+        />
+      )}
 
       <div className="container mx-auto px-0 md:px-6">
         {/* Semantic and fully accessible Breadcrumbs */}
@@ -279,26 +284,28 @@ export default async function ProductPage({ params }: ProductPageProps) {
         </Suspense>
 
         {/* Accessible FAQ Accordion */}
-        <section aria-labelledby="product-faq-heading" className="mt-8 md:mt-12 border-t border-border pt-6 max-w-4xl mx-auto">
-          <h2 id="product-faq-heading" className="text-xl md:text-2xl font-heading font-medium tracking-wide text-foreground mb-4 text-center uppercase text-[#AC8717]">
-            Frequently Asked Questions
-          </h2>
-          <div className="space-y-3">
-            {productFaqs.map((faq, index) => (
-              <details key={index} className="group bg-muted/5 border border-border/40 rounded-2xl overflow-hidden transition-all duration-300 open:bg-muted/10 open:border-[#AC8717]/20">
-                <summary className="flex items-center justify-between gap-4 p-3 md:p-4 font-semibold text-xs md:text-sm tracking-wide text-foreground hover:text-[#AC8717] cursor-pointer list-none select-none [&::-webkit-details-marker]:hidden">
-                  <span>{faq.question}</span>
-                  <span className="text-xs text-muted-foreground/60 transition-transform duration-300 group-open:rotate-180 group-open:text-[#AC8717]" aria-hidden="true">
-                    ▼
-                  </span>
-                </summary>
-                <div className="px-3 md:px-4 pb-4 text-xs md:text-sm font-light text-muted-foreground leading-relaxed">
-                  {faq.answer}
-                </div>
-              </details>
-            ))}
-          </div>
-        </section>
+        {product.faqEnabled && (
+          <section aria-labelledby="product-faq-heading" className="mt-8 md:mt-12 border-t border-border pt-6 max-w-4xl mx-auto">
+            <h2 id="product-faq-heading" className="text-xl md:text-2xl font-heading font-medium tracking-wide text-foreground mb-4 text-center uppercase text-[#AC8717]">
+              Frequently Asked Questions
+            </h2>
+            <div className="space-y-3">
+              {productFaqs.map((faq: any, index: number) => (
+                <details key={index} className="group bg-muted/5 border border-border/40 rounded-2xl overflow-hidden transition-all duration-300 open:bg-muted/10 open:border-[#AC8717]/20">
+                  <summary className="flex items-center justify-between gap-4 p-3 md:p-4 font-semibold text-xs md:text-sm tracking-wide text-foreground hover:text-[#AC8717] cursor-pointer list-none select-none [&::-webkit-details-marker]:hidden">
+                    <span>{faq.question}</span>
+                    <span className="text-xs text-muted-foreground/60 transition-transform duration-300 group-open:rotate-180 group-open:text-[#AC8717]" aria-hidden="true">
+                      ▼
+                    </span>
+                  </summary>
+                  <div className="px-3 md:px-4 pb-4 text-xs md:text-sm font-light text-muted-foreground leading-relaxed">
+                    {faq.answer}
+                  </div>
+                </details>
+              ))}
+            </div>
+          </section>
+        )}
 
         {/* Cross-Sell: Related Products (Streamed Progressively) */}
         <Suspense fallback={<RelatedProductsSkeleton />}>

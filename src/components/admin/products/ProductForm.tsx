@@ -63,6 +63,8 @@ export function ProductForm({ initialData, onSubmit, isPending, title }: Product
         variations: [] as IVariationForm[],
         detailsSections: [] as ISection[],
         isOnSale: false,
+        faqEnabled: false,
+        faqs: [] as { question: string; answer: string }[],
     });
 
     const [uniqueness, setUniqueness] = useState({
@@ -92,7 +94,9 @@ export function ProductForm({ initialData, onSubmit, isPending, title }: Product
                     _clientId: s._clientId || Math.random().toString(36).substr(2, 9),
                     data: s.data || {}
                 })) || [],
-                isOnSale: !!initialData.isOnSale
+                isOnSale: !!initialData.isOnSale,
+                faqEnabled: !!initialData.faqEnabled,
+                faqs: initialData.faqs || [],
             });
         }
     }, [initialData]);
@@ -170,7 +174,9 @@ export function ProductForm({ initialData, onSubmit, isPending, title }: Product
                 salePrice: v.salePrice ? Number(v.salePrice) : undefined,
                 stock: v.stock ? Number(v.stock) : 10,
                 sku: `${formData.skuPrefix}${v.volume}${v.volumeUnit.toUpperCase()}`
-            }))
+            })),
+            faqEnabled: formData.faqEnabled,
+            faqs: formData.faqs,
         };
 
         // Prevent Mongoose cast errors by cleaning up empty string / falsy ObjectId fields
@@ -697,6 +703,92 @@ export function ProductForm({ initialData, onSubmit, isPending, title }: Product
                                     </span>
                                 </div>
                             </div>
+                        </div>
+
+                        {/* FAQ settings Box */}
+                        <div className="bg-[#111] border border-white/5 rounded-2xl p-6 md:p-8 flex flex-col gap-6 relative overflow-hidden group">
+                            <div className="flex items-center justify-between border-b border-white/10 pb-4">
+                                <h2 className="text-xl font-medium text-white">Frequently Asked Questions</h2>
+                            </div>
+
+                            {/* FAQ Enable Checkbox */}
+                            <div 
+                                className="flex items-center gap-3 p-4 bg-white/5 rounded-xl border border-white/5 group hover:border-[#c06b40]/30 transition-all cursor-pointer select-none"
+                                onClick={() => setFormData(prev => ({ ...prev, faqEnabled: !prev.faqEnabled }))}
+                            >
+                                <div className={cn(
+                                    "w-5 h-5 rounded-md border flex items-center justify-center transition-all duration-300",
+                                    formData.faqEnabled ? "bg-[#c06b40] border-[#c06b40] shadow-[0_0_15px_rgba(192,107,64,0.4)]" : "border-white/20"
+                                )}>
+                                    {formData.faqEnabled && <CheckCircle className="w-3.5 h-3.5 text-white" />}
+                                </div>
+                                <div className="flex flex-col">
+                                    <span className="text-sm font-bold text-white uppercase tracking-wider">Enable FAQ Section</span>
+                                    <p className="text-[10px] text-gray-500 italic">Toggle whether the Frequently Asked Questions accordion shows on the product detail page.</p>
+                                </div>
+                            </div>
+
+                            {formData.faqEnabled && (
+                                <div className="space-y-4 animate-in fade-in duration-300">
+                                    <div className="flex justify-between items-center">
+                                        <label className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Custom FAQs</label>
+                                        <Button
+                                            type="button"
+                                            variant="outline"
+                                            size="sm"
+                                            onClick={() => setFormData(prev => ({ ...prev, faqs: [...(prev.faqs || []), { question: "", answer: "" }] }))}
+                                            className="bg-[#c06b40]/10 border-[#c06b40]/30 text-[#c06b40] hover:bg-[#c06b40] hover:text-white transition-all text-xs h-8"
+                                        >
+                                            <Plus className="w-3 h-3 mr-1" /> Add FAQ
+                                        </Button>
+                                    </div>
+
+                                    {(!formData.faqs || formData.faqs.length === 0) ? (
+                                        <p className="text-xs text-gray-500 italic text-center py-4 bg-white/1 rounded-xl border border-dashed border-white/5">
+                                            No custom FAQs added. (Will fallback to standard system FAQs)
+                                        </p>
+                                    ) : (
+                                        <div className="space-y-4 max-h-[300px] overflow-y-auto pr-1">
+                                            {formData.faqs.map((faq: any, idx: number) => (
+                                                <div key={idx} className="p-4 bg-white/1 border border-white/5 rounded-xl space-y-3 relative group">
+                                                    <div className="flex items-center justify-between">
+                                                        <span className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Question #{idx + 1}</span>
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => {
+                                                                setFormData(prev => ({ ...prev, faqs: (prev.faqs || []).filter((_, i) => i !== idx) }));
+                                                            }}
+                                                            className="text-gray-500 hover:text-red-500 transition-colors p-1"
+                                                        >
+                                                            <Trash2 className="w-3.5 h-3.5" />
+                                                        </button>
+                                                    </div>
+                                                    <Input
+                                                        placeholder="Question text..."
+                                                        value={faq.question}
+                                                        onChange={(e) => {
+                                                            const newFaqs = [...formData.faqs];
+                                                            newFaqs[idx].question = e.target.value;
+                                                            setFormData(prev => ({ ...prev, faqs: newFaqs }));
+                                                        }}
+                                                        className="bg-black border-white/10 h-10 text-sm"
+                                                    />
+                                                    <textarea
+                                                        placeholder="Answer text..."
+                                                        value={faq.answer}
+                                                        onChange={(e) => {
+                                                            const newFaqs = [...formData.faqs];
+                                                            newFaqs[idx].answer = e.target.value;
+                                                            setFormData(prev => ({ ...prev, faqs: newFaqs }));
+                                                        }}
+                                                        className="w-full bg-black border border-white/10 rounded-md px-3 py-2 text-white h-20 focus:outline-none focus:border-[#c06b40] transition-colors resize-none text-xs"
+                                                    />
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
+                            )}
                         </div>
                     </div>
                 </div>

@@ -97,6 +97,14 @@ const productSchema = new Schema<IProductDocument>(
             default: false,
         },
         detailsSections: [sectionSchema],
+        faqEnabled: {
+            type: Boolean,
+            default: false,
+        },
+        faqs: [{
+            question: { type: String, required: true },
+            answer: { type: String, required: true }
+        }],
     },
     {
         timestamps: true,

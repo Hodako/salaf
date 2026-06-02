@@ -72,6 +72,11 @@ export interface IProductDocument extends Document {
     };
     detailsSections: unknown[]; // Strictly typing dynamic CMS layout elements rather than 'any'
     isOnSale?: boolean;
+    faqEnabled?: boolean;
+    faqs?: {
+        question: string;
+        answer: string;
+    }[];
 }
 
 /**
