@@ -9,5 +9,7 @@ export { RichText } from "./RichText";
 export { ReviewsSkeleton, RelatedProductsSkeleton } from "./ProductSkeletons";
 export { ProductReviewsContainer } from "./ProductReviewsContainer";
 export { RelatedProductsContainer } from "./RelatedProductsContainer";
+export { ScrollToTop } from "./ScrollToTop";
+
 
 

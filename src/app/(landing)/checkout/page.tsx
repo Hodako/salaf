@@ -538,7 +538,7 @@ export default function CheckoutPage() {
                                                     src={item.featuredImage}
                                                     alt={item.productName}
                                                     fill
-                                                    className="object-contain p-2 group-hover:scale-105 transition-transform duration-500"
+                                                    className="object-cover group-hover:scale-105 transition-transform duration-500"
                                                 />
                                             </div>
                                             <div className="flex-1 min-w-0 py-1">

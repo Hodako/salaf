@@ -85,7 +85,7 @@ export function CartSidebar() {
                                         src={item.featuredImage}
                                         alt={item.productName}
                                         fill
-                                        className="object-contain p-2 group-hover:scale-105 transition-transform duration-500"
+                                        className="object-cover group-hover:scale-105 transition-transform duration-500"
                                     />
                                 </Link>
 

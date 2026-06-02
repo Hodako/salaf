@@ -11,7 +11,8 @@ import {
   ProductReviewsContainer, 
   RelatedProductsContainer, 
   ReviewsSkeleton, 
-  RelatedProductsSkeleton 
+  RelatedProductsSkeleton,
+  ScrollToTop
 } from "@/components/product";
 import { TemplateInjector } from "@/components/blocks/TemplateInjector";
 
@@ -112,8 +113,9 @@ export default async function ProductPage({ params }: ProductPageProps) {
   if (template?.html) {
     return (
       <main className="bg-background min-h-screen w-full">
+        <ScrollToTop dependency={product._id} />
         {template.css && <style dangerouslySetInnerHTML={{ __html: template.css }} />}
-        <TemplateInjector html={template.html} productData={productData} />
+        <TemplateInjector key={productData._id} html={template.html} productData={productData} />
       </main>
     );
   }
@@ -232,6 +234,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
 
   return (
     <main className="bg-background min-h-screen text-foreground pt-2 md:pt-8 pb-8">
+      <ScrollToTop dependency={product._id} />
       {/* Inject JSON-LD Schema scripts */}
       <script
         type="application/ld+json"
@@ -268,16 +271,18 @@ export default async function ProductPage({ params }: ProductPageProps) {
 
         {/* Primary Info: Gallery + Actions (Renders Instantly) */}
         <ProductView 
+          key={productData._id}
           product={productData} 
           reviewStats={{ avgRating, totalReviews }} 
         />
 
         {/* Secondary Info: Story Sections */}
-        <ProductStory sections={productData.detailsSections} />
+        <ProductStory key={productData._id} sections={productData.detailsSections} />
 
         {/* Review Section (Streamed Progressively) */}
         <Suspense fallback={<ReviewsSkeleton />}>
           <ProductReviewsContainer 
+            key={productData._id}
             productId={productData._id}
             productName={productData.name}
           />
