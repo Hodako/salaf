@@ -77,3 +77,34 @@ export async function PATCH(
         return NextResponse.json({ error: "Failed to update order" }, { status: 500 });
     }
 }
+
+export async function DELETE(
+    req: Request,
+    { params }: { params: Promise<{ id: string }> }
+) {
+    try {
+        const { id } = await params;
+        const authUser = await getCurrentUser();
+        if (!authUser) {
+            return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+        }
+
+        await dbConnect();
+        
+        // Skip DB admin role check in dev mode
+        const isDev = process.env.NODE_ENV === 'development' || process.env.DEV_ADMIN_BYPASS === 'true';
+        if (!isDev) {
+            const dbUser = await User.findOne({ firebaseUid: authUser.uid });
+            if (!dbUser || dbUser.role !== 'admin') {
+                return NextResponse.json({ error: "Forbidden: Admin access required" }, { status: 403 });
+            }
+        }
+
+        const deletedOrder = await Order.findByIdAndDelete(id);
+        if (!deletedOrder) return NextResponse.json({ error: "Order not found" }, { status: 404 });
+
+        return NextResponse.json({ message: "Order deleted successfully" });
+    } catch (error: any) {
+        return NextResponse.json({ error: "Failed to delete order" }, { status: 500 });
+    }
+}

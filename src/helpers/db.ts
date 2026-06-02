@@ -9,12 +9,10 @@ if (!MONGODB_URI) {
     );
 }
 
-// @ts-ignore
-let cached = global.mongoose;
+let cached = (globalThis as any).mongoose;
 
 if (!cached) {
-    // @ts-ignore
-    cached = global.mongoose = { conn: null, promise: null };
+    cached = (globalThis as any).mongoose = { conn: null, promise: null };
 }
 
 /**
@@ -36,7 +34,9 @@ async function dbConnect() {
             bufferCommands: false,
         };
 
+        console.time("[DB Telemetry] First Connect Handshake");
         cached.promise = mongoose.connect(MONGODB_URI as string, opts).then((mongoose) => {
+            console.timeEnd("[DB Telemetry] First Connect Handshake");
             return mongoose;
         });
     }

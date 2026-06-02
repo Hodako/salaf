@@ -5,11 +5,13 @@ import { Product } from '@/models';
 export async function GET() {
     try {
         await dbConnect();
+        console.time("[DB Telemetry] Admin Fetch Products");
         const products = await Product.find({})
             .populate('brand')
             .populate('category')
             .populate('subcategory')
             .sort({ createdAt: -1 });
+        console.timeEnd("[DB Telemetry] Admin Fetch Products");
         return NextResponse.json(products, { status: 200 });
     } catch (error: any) {
         return NextResponse.json({ message: "Failed to fetch products" }, { status: 500 });

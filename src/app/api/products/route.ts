@@ -94,11 +94,13 @@ export async function GET(request: Request) {
 
         // If searching, use a faster find query instead of aggregation to minimize overhead
         if (q) {
+            console.time("[DB Telemetry] Search Products Query");
             const products = await Product.find(query)
                 .select("name slug featuredImage images variations isOnSale")
                 .sort(sortOption)
                 .limit(limit)
                 .lean();
+            console.timeEnd("[DB Telemetry] Search Products Query");
             
             let didYouMean = null;
             if (products.length === 0) {
@@ -162,6 +164,7 @@ export async function GET(request: Request) {
         }
 
         // Use aggregation to fetch products with review stats for normal shop browsing
+        console.time("[DB Telemetry] Normal Shop Browsing Query");
         const [results, total] = await Promise.all([
             Product.aggregate([
                 { $match: query },
@@ -223,6 +226,7 @@ export async function GET(request: Request) {
             ]),
             Product.countDocuments(query)
         ]);
+        console.timeEnd("[DB Telemetry] Normal Shop Browsing Query");
 
         return NextResponse.json({
             products: results,

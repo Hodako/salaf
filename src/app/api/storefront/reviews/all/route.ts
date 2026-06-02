@@ -26,10 +26,25 @@ export async function GET(req: Request) {
             extReviewQuery.product = productId;
         }
 
-        const [reviews, extReviews] = await Promise.all([
-            Review.find(reviewQuery).populate("product", "_id name slug images featuredImage").lean(),
-            ExternalReview.find(extReviewQuery).populate("product", "_id name slug images featuredImage").lean()
+        const startIndex = (page - 1) * limit;
+        const dbLimit = startIndex + limit;
+
+        console.time("[DB Telemetry] Storefront Reviews Query");
+        const [reviews, extReviews, totalReviews, totalExtReviews] = await Promise.all([
+            Review.find(reviewQuery)
+                .sort({ createdAt: -1 })
+                .limit(dbLimit)
+                .populate("product", "_id name slug images featuredImage")
+                .lean(),
+            ExternalReview.find(extReviewQuery)
+                .sort({ createdAt: -1 })
+                .limit(dbLimit)
+                .populate("product", "_id name slug images featuredImage")
+                .lean(),
+            Review.countDocuments(reviewQuery),
+            ExternalReview.countDocuments(extReviewQuery)
         ]);
+        console.timeEnd("[DB Telemetry] Storefront Reviews Query");
 
         const normalizedReviews = [];
 
@@ -76,7 +91,6 @@ export async function GET(req: Request) {
         normalizedReviews.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
         const totalItems = normalizedReviews.length;
-        const startIndex = (page - 1) * limit;
         const endIndex = startIndex + limit;
         const paginatedReviews = normalizedReviews.slice(startIndex, endIndex);
 
