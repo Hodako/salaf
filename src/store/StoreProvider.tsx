@@ -7,8 +7,6 @@ import { useAppDispatch, useAppSelector } from "./hooks";
 import { setCart } from "./slices/cartSlice";
 import { setUser, setLoading } from "./slices/authSlice";
 import { setWishlistItems, setWishlistProducts, setIsWishlistLoading } from "./slices/wishlistSlice";
-import { auth } from "@/lib/firebase";
-import { onAuthStateChanged } from "firebase/auth";
 import api from "@/lib/axios";
 
 // Client-side initialization for Redux
@@ -41,27 +39,19 @@ function ReduxInitializer({ children }: { children: React.ReactNode }) {
         }
     }, [cartItems]);
 
-    // 3. Auth Listener & Sync
+    // 3. Auth Session Synchronization (Direct session check from HTTP cookies)
     useEffect(() => {
-        const unsubscribe = onAuthStateChanged(auth, async (fbUser) => {
-            if (fbUser) {
-                dispatch(setLoading(true));
-                try {
-                    const { data } = await api.post("/auth/sync", {
-                        firebaseUid: fbUser.uid,
-                        email: fbUser.email,
-                        name: fbUser.displayName,
-                        image: fbUser.photoURL
-                    });
-
-                    const { data: profile } = await api.get("/auth/me");
-
+        const checkAuth = async () => {
+            dispatch(setLoading(true));
+            try {
+                const { data: profile } = await api.get("/auth/me");
+                if (profile && profile.uid) {
                     const userPayload = {
-                        uid: fbUser.uid,
-                        email: fbUser.email,
-                        name: fbUser.displayName || profile.name,
-                        image: profile.image || fbUser.photoURL,
-                        role: profile.role || data.role,
+                        uid: profile.uid,
+                        email: profile.email,
+                        name: profile.name,
+                        image: profile.image,
+                        role: profile.role,
                         phoneNumber: profile.phoneNumber,
                         address: profile.address,
                         wishlist: profile.wishlist
@@ -73,23 +63,19 @@ function ReduxInitializer({ children }: { children: React.ReactNode }) {
                         const dbIds = (userPayload.wishlist as any[]).map(p => p._id?.toString() || p.toString());
                         dispatch(setWishlistItems(dbIds));
                     }
-                } catch (error) {
-                    dispatch(setUser({
-                        uid: fbUser.uid,
-                        email: fbUser.email,
-                        name: fbUser.displayName,
-                        image: fbUser.photoURL,
-                        role: "customer",
-                    }));
+                } else {
+                    dispatch(setUser(null));
+                    dispatch(setWishlistItems([]));
                 }
-            } else {
+            } catch (error) {
                 dispatch(setUser(null));
                 dispatch(setWishlistItems([]));
+            } finally {
+                dispatch(setLoading(false));
             }
-            dispatch(setLoading(false));
-        });
+        };
 
-        return () => unsubscribe();
+        checkAuth();
     }, [dispatch]);
 
     // 4. Wishlist Product Fetching

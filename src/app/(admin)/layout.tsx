@@ -28,8 +28,6 @@ import {
     Award,
     Smartphone
 } from "lucide-react";
-import { auth } from "@/lib/firebase";
-import { signOut } from "firebase/auth";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -72,7 +70,7 @@ export default function AdminLayout({
 }) {
     const router = useRouter();
     const pathname = usePathname();
-    const { user, loading } = useAuth();
+    const { user, loading, signOut: authSignOut } = useAuth();
     const [isCollapsed, setIsCollapsed] = useState(false);
     const [isMounted, setIsMounted] = useState(false);
 
@@ -101,10 +99,8 @@ export default function AdminLayout({
 
     const handleSignOut = async () => {
         try {
-            await signOut(auth);
-            document.cookie = "session=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+            await authSignOut();
             toast.info("Logged out successfully");
-            router.push("/");
         } catch (error) {
             toast.error("Failed to sign out");
         }

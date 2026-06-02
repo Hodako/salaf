@@ -3,9 +3,7 @@
 import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Image from "next/image";
-import { auth } from "@/lib/firebase";
 import api from "@/lib/axios";
-import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner"; // Assuming sonner is installed from your shadcn setup
@@ -20,58 +18,10 @@ function AuthPageContent() {
 
     const returnUrl = searchParams.get('returnUrl') || searchParams.get('redirect') || '/dashboard';
 
-    const handleGoogleSignIn = async () => {
+    const handleGoogleSignIn = () => {
         setIsLoading(true);
-        const provider = new GoogleAuthProvider();
-
-        try {
-            // 1. Authenticate with Firebase on the Client
-            const result = await signInWithPopup(auth, provider);
-            const user = result.user;
-
-            if (!user) {
-                throw new Error("No user returned from Google.");
-            }
-
-            // 2. Synchronize with our MongoDB backend route
-            const token = await user.getIdToken();
-
-            const reqBody = {
-                firebaseUid: user.uid,
-                email: user.email,
-                name: user.displayName || 'Salaf User',
-                image: user.photoURL || undefined,
-            };
-
-            const { data } = await api.post('/auth/sync', reqBody, {
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                }
-            });
-
-            toast.success("Successfully logged in!");
-
-            // Google Tag Tracking
-            if (data.role === 'customer') {
-                if (data.message === "User created successfully") {
-                    logSignUp("Google");
-                } else {
-                    logLogin("Google");
-                }
-            }
-
-            // 3. Role-based Redirection
-            if (data.role === 'admin') {
-                router.push('/admin/dashboard');
-            } else {
-                router.push(returnUrl);
-            }
-
-        } catch (error: any) {
-            toast.error(error.message || "An error occurred during sign in.");
-        } finally {
-            setIsLoading(false);
-        }
+        toast.info("Redirecting to Google...");
+        window.location.href = "/api/auth/google";
     };
 
     return (

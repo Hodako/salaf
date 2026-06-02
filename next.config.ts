@@ -13,7 +13,7 @@ const nextConfig: NextConfig = {
       },
     ];
   },
-  output: "standalone",
+  // output: "standalone",
   experimental: {
     inlineCss: true,
     webVitalsAttribution: ['CLS', 'LCP', 'FID', 'INP', 'TTFB', 'FCP'],

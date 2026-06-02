@@ -3,12 +3,16 @@ import { renderHook, act } from '@testing-library/react';
 import { useAuth } from '../useAuth';
 import { useAppSelector, useAppDispatch } from '@/store/hooks';
 import { clearUser } from '@/store/slices/authSlice';
-import { signOut as firebaseSignOut } from 'firebase/auth';
+import api from '@/lib/axios';
 import { useRouter } from 'next/navigation';
 
 vi.mock('@/store/hooks');
 vi.mock('@/store/slices/authSlice');
-vi.mock('firebase/auth');
+vi.mock('@/lib/axios', () => ({
+    default: {
+        post: vi.fn().mockResolvedValue({}),
+    },
+}));
 vi.mock('next/navigation', () => ({
     useRouter: vi.fn(),
 }));
@@ -42,7 +46,7 @@ describe('useAuth hook', () => {
         expect(result.current.loading).toBe(false);
     });
 
-    it('should call signOut, clearUser and redirect on signOut', async () => {
+    it('should call api.post for signout, clearUser and redirect on signOut', async () => {
         (useAppSelector as any).mockImplementation((selector: any) => selector({
             auth: {
                 user: { uid: '123' },
@@ -58,7 +62,7 @@ describe('useAuth hook', () => {
             await result.current.signOut();
         });
 
-        expect(firebaseSignOut).toHaveBeenCalled();
+        expect(api.post).toHaveBeenCalledWith('/auth/signout');
         expect(mockDispatch).toHaveBeenCalledWith(clearUser());
         expect(mockPush).toHaveBeenCalledWith('/');
     });

@@ -13,7 +13,7 @@ export function proxy(request: NextRequest) {
         return NextResponse.next();
     }
 
-    // Attempt to get the session cookie we set in /api/auth/sync
+    // Attempt to get the session cookie we set in /api/auth/google/callback
     const sessionCookie = request.cookies.get('session')?.value;
 
     if (!sessionCookie) {
