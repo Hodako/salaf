@@ -106,7 +106,7 @@ export default async function BrandPage({ params }: BrandPageProps) {
                 dangerouslySetInnerHTML={{ __html: JSON.stringify(collectionPageSchema) }}
             />
 
-            <div className="container mx-auto px-4 md:px-6">
+            <div className="max-w-7xl mx-auto px-4 md:px-6">
                 {/* Accessible Breadcrumbs */}
                 <nav aria-label="Breadcrumb" className="mb-6 md:mb-10">
                     <ol className="flex items-center flex-wrap gap-2 text-[10px] uppercase font-bold tracking-widest text-muted-foreground/60">

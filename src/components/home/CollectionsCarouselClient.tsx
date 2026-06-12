@@ -137,7 +137,7 @@ export default function CollectionsCarouselClient({ collections }: Props) {
         <div
           ref={scrollRef}
           onScroll={checkScroll}
-          className="flex gap-3 sm:gap-4 md:gap-5 overflow-x-auto scrollbar-none snap-x snap-mandatory py-2 pl-4 pr-3 sm:px-2 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
+          className="flex gap-3 sm:gap-4 md:gap-5 overflow-x-auto scrollbar-none snap-x snap-mandatory py-2 px-0 sm:px-2 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
         >
           {collections.map((collection, index) => {
             // Mobile Coverflow mathematical calculations based on screen dimensions and scroll position

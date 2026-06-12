@@ -33,7 +33,7 @@ export default async function BrandsPage() {
 
     return (
         <main className="min-h-screen bg-background text-foreground pt-4 md:pt-24 pb-16 overflow-x-hidden">
-            <div className="container mx-auto px-4 md:px-6">
+            <div className="max-w-7xl mx-auto px-2 md:px-6">
                 {/* Breadcrumbs */}
                 <nav aria-label="Breadcrumb" className="mb-6 md:mb-10">
                     <ol className="flex items-center flex-wrap gap-2 text-[10px] uppercase font-bold tracking-widest text-muted-foreground/60">

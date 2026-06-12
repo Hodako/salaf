@@ -251,7 +251,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
         />
       )}
 
-      <div className="container mx-auto px-4 md:px-6">
+      <div className="max-w-7xl mx-auto px-2 md:px-6">
         {/* Semantic and fully accessible Breadcrumbs */}
         <nav aria-label="Breadcrumb" className="mb-2 md:mb-4 px-0">
           <ol className="flex items-center flex-wrap gap-2 text-[10px] uppercase font-bold tracking-widest text-muted-foreground/60">
@@ -314,7 +314,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
       </Suspense>
 
       {/* Cross-Sell: Related Products (Streamed Progressively) */}
-      <div className="container mx-auto px-4 md:px-6">
+      <div className="max-w-7xl mx-auto px-2 md:px-6">
         <Suspense fallback={<RelatedProductsSkeleton />}>
           <RelatedProductsContainer 
             collections={productData.collections} 
