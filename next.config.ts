@@ -11,6 +11,10 @@ const nextConfig: NextConfig = {
         source: '/whoisadmin/admin/:path*',
         destination: '/admin/:path*',
       },
+      {
+        source: '/review',
+        destination: '/reviews',
+      },
     ];
   },
   // output: "standalone",
