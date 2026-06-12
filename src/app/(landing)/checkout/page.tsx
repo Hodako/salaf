@@ -61,10 +61,68 @@ export default function CheckoutPage() {
     const getAreasOf = (upazilaName: string) => {
         if (!upazilaName) return [];
         
+        const explicitUpazilaMap: Record<string, string> = {
+            'shantiganj': 'southsunamganj',
+            'shanthiganj': 'southsunamganj',
+            'comillasadarsouth': 'sadarsouth',
+            'gazipursadarjoydebpur': 'gazipursadar',
+            'goalandaghat': 'goalanda',
+            'narundipoliceic': 'jamalpursadar',
+            'madhyanagar': 'dharmapasha',
+            'shahbazpurtown': 'sarail',
+            'eidgaon': 'coxsbazarsadar',
+            'tongi': 'gazipursadar',
+            'siddirgonj': 'narayanganjsadar',
+            'fultola': 'fultola',
+            'phultala': 'fultola'
+        };
+
+        const normalize = (name: string) => {
+            if (!name) return "";
+            let str = name.toLowerCase().trim();
+            
+            // Clean spaces and punctuation first for map lookup
+            str = str.replace(/\s+/g, '').replace(/[^a-z0-9]/g, '');
+
+            // Apply explicit mappings
+            if (explicitUpazilaMap[str]) {
+                str = explicitUpazilaMap[str];
+            }
+
+            // Remove helper suffixes
+            str = str.replace(/upazila/g, '')
+                     .replace(/thana/g, '')
+                     .replace(/sadar/g, '');
+
+            // Direction mappings
+            str = str.replace(/north/g, 'uttar')
+                     .replace(/south/g, 'dakkhin')
+                     .replace(/dakshin/g, 'dakkhin')
+                     .replace(/dakhin/g, 'dakkhin')
+                     .replace(/east/g, 'purbo')
+                     .replace(/west/g, 'poscim');
+
+            // Transliteration normalizations
+            str = str.replace(/ph/g, 'f')
+                     .replace(/f/g, 'ph')
+                     .replace(/ou/g, 'u')
+                     .replace(/o/g, 'u')
+                     .replace(/y/g, 'i')
+                     .replace(/j/g, 'z')
+                     .replace(/sh/g, 's')
+                     .replace(/kh/g, 'h')
+                     .replace(/gh/g, 'h')
+                     .replace(/ch/g, 'c')
+                     .replace(/c/g, 'k');
+
+            return str;
+        };
+
         let foundUpazilaId: number | null = null;
         const upazilasObject = bdLocationData.upazilas_en as Record<string, Array<{ value: number, title: string }>>;
         const unionsObject = bdLocationData.unions_en as Record<string, Array<{ value: number, title: string }>>;
 
+        // 1. Try exact match
         for (const districtId of Object.keys(upazilasObject)) {
             const upazilasList = upazilasObject[districtId];
             const match = upazilasList.find(
@@ -73,6 +131,63 @@ export default function CheckoutPage() {
             if (match) {
                 foundUpazilaId = match.value;
                 break;
+            }
+        }
+
+        // 2. Try normalized match
+        if (!foundUpazilaId) {
+            const normUpazila = normalize(upazilaName);
+            for (const districtId of Object.keys(upazilasObject)) {
+                const upazilasList = upazilasObject[districtId];
+                const match = upazilasList.find(
+                    u => normalize(u.title) === normUpazila
+                );
+                if (match) {
+                    foundUpazilaId = match.value;
+                    break;
+                }
+            }
+        }
+
+        // 3. Try Levenshtein match (fallback edit distance)
+        if (!foundUpazilaId) {
+            const getLevenshteinDistance = (a: string, b: string) => {
+                const matrix = [];
+                for (let i = 0; i <= b.length; i++) matrix[i] = [i];
+                for (let j = 0; j <= a.length; j++) matrix[0][j] = j;
+                for (let i = 1; i <= b.length; i++) {
+                    for (let j = 1; j <= a.length; j++) {
+                        if (b.charAt(i - 1) === a.charAt(j - 1)) {
+                            matrix[i][j] = matrix[i - 1][j - 1];
+                        } else {
+                            matrix[i][j] = Math.min(
+                                matrix[i - 1][j - 1] + 1,
+                                matrix[i][j - 1] + 1,
+                                matrix[i - 1][j] + 1
+                            );
+                        }
+                    }
+                }
+                return matrix[b.length][a.length];
+            };
+
+            let bestMatch = null;
+            let minDistance = 999;
+            const normUpazila = normalize(upazilaName);
+            
+            for (const districtId of Object.keys(upazilasObject)) {
+                const upazilasList = upazilasObject[districtId];
+                for (const u of upazilasList) {
+                    const distScore = getLevenshteinDistance(normalize(u.title), normUpazila);
+                    if (distScore < minDistance) {
+                        minDistance = distScore;
+                        bestMatch = u;
+                    }
+                }
+            }
+
+            if (bestMatch && minDistance <= 2) {
+                foundUpazilaId = bestMatch.value;
             }
         }
         

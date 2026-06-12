@@ -11,7 +11,7 @@ interface CollectionPageProps {
 export async function generateMetadata({ params }: CollectionPageProps): Promise<Metadata> {
     const { slug } = await params;
     await dbConnect();
-    const collection = await Collection.findOne({ slug }).lean() as any;
+    const collection = await Collection.findOne({ slug: { $regex: new RegExp("^" + slug + "$", "i") } }).lean() as any;
     
     if (!collection) return { title: 'Collection Not Found | Salaf - سلف' };
 
@@ -45,7 +45,7 @@ export async function generateMetadata({ params }: CollectionPageProps): Promise
 export default async function CollectionPage({ params }: CollectionPageProps) {
     const { slug } = await params;
     await dbConnect();
-    const collection = await Collection.findOne({ slug }).lean() as any;
+    const collection = await Collection.findOne({ slug: { $regex: new RegExp("^" + slug + "$", "i") } }).lean() as any;
 
     if (!collection) return notFound();
 

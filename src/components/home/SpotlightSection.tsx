@@ -136,19 +136,19 @@ export function SpotlightSection({ preloadedData }: SpotlightSectionProps = {}) 
   if (loading || sections.length === 0) return null;
 
   return (
-    <div className="w-full space-y-12">
+    <div className="w-full space-y-4 sm:space-y-12">
       {sections.map((section, secIdx) => {
         if (section.products.length === 0) return null;
 
         return (
           <section 
             key={secIdx} 
-            className="w-full bg-[#fcfbf9] border-t border-b border-[#e2ddd1]/40 py-3.5 sm:py-16 px-0 sm:px-4"
+            className="w-full bg-[#fcfbf9] border-t border-b border-[#e2ddd1]/40 py-2 sm:py-16 px-0 sm:px-4"
           >
             <div className="w-full sm:container sm:mx-auto">
               
               {/* Heading */}
-              <div className="flex flex-col items-center justify-center mb-3.5 sm:mb-10 text-center px-4">
+              <div className="flex flex-col items-center justify-center mb-2 sm:mb-10 text-center px-4">
                 {section.subtitle && (
                   <p className="text-[8px] sm:text-[10px] font-black uppercase tracking-[0.3em] text-[#AC8717] mb-1">
                     {section.subtitle}

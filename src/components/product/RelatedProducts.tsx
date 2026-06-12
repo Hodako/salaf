@@ -8,8 +8,8 @@ export function RelatedProducts({ products: rawProducts }: RelatedProductsProps)
     const products = JSON.parse(JSON.stringify(rawProducts)) as ClientProduct[];
 
     return (
-        <section className="py-12 md:py-24 border-t border-border">
-            <h2 className="text-3xl md:text-5xl font-heading font-medium text-center text-bprimary-dark mb-10 md:mb-20 tracking-wide">
+        <section className="py-6 md:py-10 border-t border-border">
+            <h2 className="text-xl md:text-2xl font-heading font-medium text-center text-bprimary-dark mb-5 md:mb-8 tracking-wide uppercase">
                 Discover More
             </h2>
 

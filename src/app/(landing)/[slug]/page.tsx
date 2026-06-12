@@ -43,7 +43,7 @@ export default async function DynamicPage({ params }: { params: Promise<{ slug: 
     
     // Protect internal routes from being caught here accidentally 
     // Usually NextJS router specificity handles this, but good to be safe if 'product' isn't explicitly defined in landing
-    if (['product', 'shop', 'checkout', 'p', 'category', 'blog'].includes(slug.toLowerCase())) {
+    if (['product', 'shop', 'checkout', 'p', 'category', 'blog', 'collections'].includes(slug.toLowerCase())) {
          return notFound();
     }
 

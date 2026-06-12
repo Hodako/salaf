@@ -20,7 +20,7 @@ export function DynamicBlocksRenderer({ sections }: DynamicBlocksRendererProps) 
     if (!sections || sections.length === 0) return null;
 
     return (
-        <div className="w-full flex flex-col pb-24 text-black">
+        <div className="w-full flex flex-col pb-2 text-black">
             {sections.map((section, index) => {
                 const key = `block-${index}-${section.type}`;
 

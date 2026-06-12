@@ -123,19 +123,19 @@ export function ProductReviewForm({ productId, productName, onSuccess }: Product
   }
 
   return (
-    <div className="bg-background p-8 md:p-10 space-y-6">
+    <div className="bg-background p-5 sm:p-8 md:p-10 space-y-4 sm:space-y-6">
       <div className="space-y-1">
-        <h3 className="text-2xl font-heading font-medium text-foreground">
+        <h3 className="text-lg sm:text-2xl font-heading font-medium text-foreground">
           Review <span className="text-bprimary">Product</span>
         </h3>
-        <p className="text-muted-foreground text-[10px] font-bold uppercase tracking-widest">Experience with {productName}</p>
+        <p className="text-muted-foreground text-[9px] sm:text-[10px] font-bold uppercase tracking-widest">Experience with {productName}</p>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-6">
+      <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
         {/* Rating */}
-        <div className="space-y-2">
-          <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Rating</label>
-          <div className="flex items-center gap-2 bg-muted/30 p-3 rounded-xl w-fit border border-border/50">
+        <div className="space-y-1.5 sm:space-y-2">
+          <label className="text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-muted-foreground">Rating</label>
+          <div className="flex items-center gap-1.5 bg-muted/30 p-2.5 sm:p-3 rounded-xl w-fit border border-border/50">
             {[1, 2, 3, 4, 5].map((star) => (
               <button
                 key={star}
@@ -144,7 +144,7 @@ export function ProductReviewForm({ productId, productName, onSuccess }: Product
                 className="transition-all hover:scale-110 focus:outline-none"
               >
                 <Star
-                  className={cn("w-6 h-6 transition-colors", star <= formData.rating ? "fill-bprimary text-bprimary" : "text-muted/20")}
+                  className={cn("w-5 h-5 sm:w-6 h-6 transition-colors", star <= formData.rating ? "fill-bprimary text-bprimary" : "text-muted/20")}
                 />
               </button>
             ))}
@@ -214,24 +214,23 @@ export function ProductReviewForm({ productId, productName, onSuccess }: Product
           </div>
         </div>
 
-        {/* Submit */}
-        <div className="pt-2">
+        <div className="pt-1.5">
           {isLoggedIn ? (
             <Button
               type="submit"
               disabled={isSubmitting}
-              className="w-full h-12 bg-bprimary text-white hover:bg-bprimary-dark hover:scale-[1.01] transition-all rounded-xl font-black uppercase tracking-widest text-[10px]"
+              className="w-full h-10 sm:h-12 bg-bprimary text-white hover:bg-bprimary-dark hover:scale-[1.01] transition-all rounded-xl font-black uppercase tracking-widest text-[9px] sm:text-[10px]"
             >
               {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin " /> : "Post Review"}
             </Button>
           ) : (
-            <div className="flex flex-col items-center gap-4 p-6 rounded-2xl bg-muted/30 border border-dashed border-border/50 text-center">
-              <p className="text-xs text-muted-foreground font-medium">Please sign in to share your experience.</p>
+            <div className="flex flex-col items-center gap-3.5 p-4 rounded-xl bg-muted/30 border border-dashed border-border/50 text-center">
+              <p className="text-[11px] sm:text-xs text-muted-foreground font-medium">Please sign in to share your experience.</p>
               <Button
                 type="button"
                 onClick={handleSignIn}
                 variant="outline"
-                className="h-10 px-6 border-bprimary text-bprimary hover:bg-bprimary hover:text-white transition-all rounded-lg font-bold uppercase tracking-widest text-[10px]"
+                className="h-9 sm:h-10 px-5 border-bprimary text-bprimary hover:bg-bprimary hover:text-white transition-all rounded-lg font-bold uppercase tracking-widest text-[9px] sm:text-[10px]"
               >
                 Sign in
               </Button>

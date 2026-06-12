@@ -233,7 +233,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
   };
 
   return (
-    <main className="bg-background min-h-screen text-foreground pt-2 md:pt-8 pb-8">
+    <main className="bg-background min-h-screen text-foreground pt-1 md:pt-2 pb-24 md:pb-8">
       <ScrollToTop dependency={product._id} />
       {/* Inject JSON-LD Schema scripts */}
       <script
@@ -251,9 +251,9 @@ export default async function ProductPage({ params }: ProductPageProps) {
         />
       )}
 
-      <div className="container mx-auto px-0 md:px-6">
+      <div className="container mx-auto px-4 md:px-6">
         {/* Semantic and fully accessible Breadcrumbs */}
-        <nav aria-label="Breadcrumb" className="mb-2 md:mb-4 px-3 md:px-0">
+        <nav aria-label="Breadcrumb" className="mb-2 md:mb-4 px-0">
           <ol className="flex items-center flex-wrap gap-2 text-[10px] uppercase font-bold tracking-widest text-muted-foreground/60">
             <li className="flex items-center gap-2">
               <a href="/" className="hover:text-foreground transition-colors">Home</a>
@@ -279,31 +279,22 @@ export default async function ProductPage({ params }: ProductPageProps) {
         {/* Secondary Info: Story Sections */}
         <ProductStory key={productData._id} sections={productData.detailsSections} />
 
-        {/* Review Section (Streamed Progressively) */}
-        <Suspense fallback={<ReviewsSkeleton />}>
-          <ProductReviewsContainer 
-            key={productData._id}
-            productId={productData._id}
-            productName={productData.name}
-          />
-        </Suspense>
-
-        {/* Accessible FAQ Accordion */}
+        {/* Accessible FAQ Accordion (Moved above reviews) */}
         {product.faqEnabled && (
-          <section aria-labelledby="product-faq-heading" className="mt-8 md:mt-12 border-t border-border pt-6 max-w-4xl mx-auto">
-            <h2 id="product-faq-heading" className="text-xl md:text-2xl font-heading font-medium tracking-wide text-foreground mb-4 text-center uppercase text-[#AC8717]">
+          <section aria-labelledby="product-faq-heading" className="mt-2 md:mt-4 border-t border-border pt-3 max-w-4xl mx-auto">
+            <h2 id="product-faq-heading" className="text-base md:text-lg font-heading font-medium tracking-wide text-foreground mb-2 text-center uppercase text-[#AC8717]">
               Frequently Asked Questions
             </h2>
-            <div className="space-y-3">
+            <div className="space-y-2.5">
               {productFaqs.map((faq: any, index: number) => (
-                <details key={index} className="group bg-muted/5 border border-border/40 rounded-2xl overflow-hidden transition-all duration-300 open:bg-muted/10 open:border-[#AC8717]/20">
-                  <summary className="flex items-center justify-between gap-4 p-3 md:p-4 font-semibold text-xs md:text-sm tracking-wide text-foreground hover:text-[#AC8717] cursor-pointer list-none select-none [&::-webkit-details-marker]:hidden">
+                <details key={index} className="group bg-muted/5 border border-border/40 rounded-xl overflow-hidden transition-all duration-300 open:bg-muted/10 open:border-[#AC8717]/20">
+                  <summary className="flex items-center justify-between gap-3 p-2.5 md:p-3.5 font-semibold text-xs md:text-sm tracking-wide text-foreground hover:text-[#AC8717] cursor-pointer list-none select-none [&::-webkit-details-marker]:hidden">
                     <span>{faq.question}</span>
                     <span className="text-xs text-muted-foreground/60 transition-transform duration-300 group-open:rotate-180 group-open:text-[#AC8717]" aria-hidden="true">
                       ▼
                     </span>
                   </summary>
-                  <div className="px-3 md:px-4 pb-4 text-xs md:text-sm font-light text-muted-foreground leading-relaxed">
+                  <div className="px-3 md:px-3.5 pb-3 text-xs md:text-sm font-light text-muted-foreground leading-relaxed">
                     {faq.answer}
                   </div>
                 </details>
@@ -311,8 +302,19 @@ export default async function ProductPage({ params }: ProductPageProps) {
             </div>
           </section>
         )}
+      </div>
 
-        {/* Cross-Sell: Related Products (Streamed Progressively) */}
+      {/* Review Section (Streamed Progressively) */}
+      <Suspense fallback={<ReviewsSkeleton />}>
+        <ProductReviewsContainer 
+          key={productData._id}
+          productId={productData._id}
+          productName={productData.name}
+        />
+      </Suspense>
+
+      {/* Cross-Sell: Related Products (Streamed Progressively) */}
+      <div className="container mx-auto px-4 md:px-6">
         <Suspense fallback={<RelatedProductsSkeleton />}>
           <RelatedProductsContainer 
             collections={productData.collections} 

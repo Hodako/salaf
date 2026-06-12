@@ -105,10 +105,22 @@ export function TemplateInjector({ html, productData, isStaticPage, preloadedHer
 
                 // 4. About Us Section Matching
                 if (element.name === 'div' && (textContent.includes('THE ESSENCE OF SALAF') || textContent.includes('DISCOVER OUR STORY') || (element.attribs.class || '').includes('py-12 md:py-24 bg-white'))) {
-                    const originalClass = element.attribs.class || '';
-                    if (!originalClass.includes('mobile-order-6')) {
-                        element.attribs.class = `${originalClass} mobile-order-6`.trim();
+                    let originalClass = element.attribs.class || '';
+                    if (!originalClass.includes('px-')) {
+                        originalClass = `${originalClass} px-5 md:px-8`.trim();
                     }
+                    if (!originalClass.includes('mobile-order-6')) {
+                        originalClass = `${originalClass} mobile-order-6`.trim();
+                    }
+                    element.attribs.class = originalClass;
+                }
+
+                // Reduce empty space between text and image in "Discover Our Story" section
+                if (element.name === 'div' && (element.attribs.class || '').includes('gap-12 md:gap-24')) {
+                    element.attribs.class = element.attribs.class.replace('gap-12 md:gap-24', 'gap-4 md:gap-8');
+                }
+                if (element.name === 'div' && (element.attribs.class || '').includes('flex justify-center') && (element.attribs.class || '').includes('order-1 md:order-2')) {
+                    element.attribs.class = element.attribs.class.replace('flex justify-center', 'flex justify-center md:justify-end');
                 }
 
                 // 5. Hide empty GrapesJS row spacer under Top Collections

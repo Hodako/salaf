@@ -11,7 +11,7 @@ interface CategoryPageProps {
 export async function generateMetadata({ params }: CategoryPageProps): Promise<Metadata> {
     const { slug } = await params;
     await dbConnect();
-    const category = await Category.findOne({ slug, isActive: true }).lean() as any;
+    const category = await Category.findOne({ slug: { $regex: new RegExp("^" + slug + "$", "i") }, isActive: true }).lean() as any;
 
     if (!category) return { title: 'Category Not Found | Salaf - سلف' };
 
@@ -45,7 +45,7 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
     await dbConnect();
 
     // 1. Fetch current Category
-    const category = await Category.findOne({ slug, isActive: true }).lean() as any;
+    const category = await Category.findOne({ slug: { $regex: new RegExp("^" + slug + "$", "i") }, isActive: true }).lean() as any;
     if (!category) return notFound();
 
     // 2. Fetch Parent category if exists for breadcrumbs hierarchy

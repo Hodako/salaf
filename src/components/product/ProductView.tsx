@@ -120,7 +120,7 @@ export function ProductView({ product, reviewStats }: ProductViewProps) {
     };
 
     return (
-        <section className="flex flex-col md:flex-row gap-2.5 md:gap-8 lg:gap-10 mb-8 md:mb-12 px-0 md:px-0 pb-24 md:pb-0">
+        <section className="flex flex-col md:flex-row gap-2.5 md:gap-8 lg:gap-10 mb-4 md:mb-6 px-0 md:px-0 pb-2 md:pb-0">
             {/* JSON-LD Schema for Rich Results */}
             <script
                 type="application/ld+json"
@@ -169,7 +169,7 @@ export function ProductView({ product, reviewStats }: ProductViewProps) {
             
             {/* Left: Product Gallery */}
             <div className="w-full md:w-1/2 flex flex-col gap-2 md:gap-4">
-                <div className="relative w-full h-[380px] sm:h-[440px] md:h-[480px] overflow-hidden group rounded-none md:rounded-2xl bg-[#AC8717]/10 border-y md:border border-[#AC8717]/20">
+                <div className="relative w-full h-[320px] sm:h-[400px] md:h-[480px] overflow-hidden group rounded-xl md:rounded-2xl bg-[#AC8717]/10 border border-[#AC8717]/20">
                     <div className="absolute inset-0 bg-white/55 md:hidden" aria-hidden="true" />
                     <Image
                         src={activeImg}
@@ -200,7 +200,7 @@ export function ProductView({ product, reviewStats }: ProductViewProps) {
             </div>
 
             {/* Right: Product Info & Buy Box */}
-            <div className="w-full md:w-1/2 flex flex-col space-y-2.5 md:space-y-3 pt-0 px-3 md:px-0">
+            <div className="w-full md:w-1/2 flex flex-col space-y-2 md:space-y-3 pt-0 px-3 md:px-0">
                 {/* Brand Store Link */}
                 <div>
                     {product.brand && typeof product.brand !== 'string' && 'slug' in product.brand ? (
@@ -219,7 +219,7 @@ export function ProductView({ product, reviewStats }: ProductViewProps) {
 
                 <div className="space-y-1">
                     <div className="flex items-start justify-between gap-4">
-                        <h1 className="text-[19px] sm:text-2xl md:text-3xl font-heading font-semibold text-foreground tracking-wide flex-1 leading-tight">
+                        <h1 className="text-[17px] sm:text-2xl md:text-3xl font-heading font-semibold text-foreground tracking-wide flex-1 leading-tight">
                             {product.name}
                         </h1>
                         {product.brand && typeof product.brand !== 'string' && 'slug' in product.brand && (product.brand as any).logo && (
@@ -239,7 +239,7 @@ export function ProductView({ product, reviewStats }: ProductViewProps) {
                             </Link>
                         )}
                     </div>
-                    <p className="text-muted-foreground text-[11px] sm:text-sm font-light leading-relaxed max-w-2xl line-clamp-2 sm:line-clamp-none">
+                    <p className="text-muted-foreground text-[10px] sm:text-xs md:text-sm font-light leading-relaxed max-w-2xl line-clamp-2 sm:line-clamp-none">
                         {product.seoDescription || "A celebration of sophistication, crafted with the finest essences."}
                     </p>
                 </div>
@@ -256,7 +256,7 @@ export function ProductView({ product, reviewStats }: ProductViewProps) {
                                 />
                             ))}
                         </div>
-                        <span className="text-[10px] font-bold text-[#AC8717] hover:text-[#8f6f12] hover:underline uppercase tracking-wider transition-colors">
+                        <span className="text-[9px] sm:text-[10px] font-bold text-[#AC8717] hover:text-[#8f6f12] hover:underline uppercase tracking-wider transition-colors">
                             {reviewStats.avgRating.toFixed(1)} out of 5 • {reviewStats.totalReviews} customer reviews
                         </span>
                     </div>
@@ -265,8 +265,8 @@ export function ProductView({ product, reviewStats }: ProductViewProps) {
                 <hr className="border-border/40" />
 
                 {/* Variations Selector */}
-                <div className="space-y-1.5">
-                    <div className="text-[10px] uppercase font-bold tracking-widest text-muted-foreground">Select Variant Size</div>
+                <div className="space-y-1">
+                    <div className="text-[9px] sm:text-[10px] uppercase font-bold tracking-widest text-muted-foreground">Select Variant Size</div>
                     <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
                         {product.variations.map((v: any, i: number) => (
                             <button
@@ -276,7 +276,7 @@ export function ProductView({ product, reviewStats }: ProductViewProps) {
                                     setActiveImg(v.image || primaryImage);
                                 }}
                                 className={cn(
-                                    "flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-1.5 rounded-lg sm:rounded-xl border text-[10px] sm:text-xs font-bold uppercase tracking-wider transition-all duration-300 bg-background",
+                                    "flex items-center gap-1.5 sm:gap-2 px-2 sm:px-2.5 py-1 rounded-md sm:rounded-lg border text-[9px] sm:text-[10px] font-bold uppercase tracking-wider transition-all duration-300 bg-background",
                                     selectedIdx === i
                                         ? "border-[#AC8717] text-[#AC8717] bg-[#AC8717]/5 shadow-xs"
                                         : "border-border text-muted-foreground hover:border-[#AC8717]/30"
@@ -294,46 +294,46 @@ export function ProductView({ product, reviewStats }: ProductViewProps) {
                 </div>
 
                 {/* Amazon "Buy Box" Card wrapper */}
-                <div id="pdp-buy-box" className="border border-[#AC8717]/25 bg-white/70 backdrop-blur-md rounded-xl md:rounded-2xl p-3 md:p-5 shadow-xs space-y-2.5 md:space-y-3.5 mt-1 md:mt-2">
+                <div id="pdp-buy-box" className="border border-[#AC8717]/25 bg-white/70 backdrop-blur-md rounded-lg md:rounded-2xl p-2.5 md:p-5 shadow-xs space-y-2 md:space-y-3.5 mt-1 md:mt-1.5">
                     {/* Price & Savings Display */}
                     <div className="space-y-1">
                         <div className="flex items-baseline gap-2">
-                            <span className="text-[26px] md:text-3xl font-extrabold tracking-wide text-[#AC8717] leading-none">
+                            <span className="text-[21px] sm:text-2xl md:text-3xl font-extrabold tracking-wide text-[#AC8717] leading-none">
                                 ৳ {price.toLocaleString()}
                             </span>
                             {activeVariation?.salePrice && activeVariation?.basePrice && activeVariation.basePrice > activeVariation.salePrice && (
-                                <span className="text-sm md:text-base text-muted-foreground line-through price-strike">
+                                <span className="text-xs md:text-base text-muted-foreground line-through price-strike">
                                     ৳ {activeVariation.basePrice.toLocaleString()}
                                 </span>
                             )}
                         </div>
                         
                         {activeVariation?.salePrice && activeVariation?.basePrice && activeVariation.basePrice > activeVariation.salePrice && (
-                            <div className="text-[10px] sm:text-[11px] font-semibold text-green-600">
+                            <div className="text-[9px] sm:text-[11px] font-semibold text-green-600">
                                 You Save: ৳ {(activeVariation.basePrice - activeVariation.salePrice).toLocaleString()} ({Math.round(((activeVariation.basePrice - activeVariation.salePrice) / activeVariation.basePrice) * 100)}%)
                             </div>
                         )}
                     </div>
 
                     {/* Stock Alert / Urgency */}
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-1.5">
                         <div className={cn(
-                            "w-2 h-2 rounded-full",
+                            "w-1.5 h-1.5 rounded-full",
                             isOutOfStock ? "bg-red-500" : (activeVariation && activeVariation.stock !== undefined && Number(activeVariation.stock) < 5) ? "bg-[#AC8717] animate-ping" : "bg-green-500"
                         )} />
                         {isOutOfStock ? (
-                            <span className="text-[11px] sm:text-xs font-bold text-red-500">Temporarily Out of Stock</span>
+                            <span className="text-[10px] sm:text-xs font-bold text-red-500">Temporarily Out of Stock</span>
                         ) : activeVariation && activeVariation.stock !== undefined && Number(activeVariation.stock) < 5 ? (
-                            <span className="text-[11px] sm:text-xs font-extrabold text-[#AC8717] animate-pulse uppercase tracking-wide">
+                            <span className="text-[10px] sm:text-xs font-extrabold text-[#AC8717] animate-pulse uppercase tracking-wide">
                                 Only {activeVariation.stock} left in stock - order soon!
                             </span>
                         ) : (
-                            <span className="text-[11px] sm:text-xs font-bold text-green-600">In Stock and ready to ship</span>
+                            <span className="text-[10px] sm:text-xs font-bold text-green-600">In Stock and ready to ship</span>
                         )}
                     </div>
 
                     {/* Shipping details */}
-                    <div className="text-[10px] sm:text-[11px] text-muted-foreground space-y-1 border-t border-b border-border/40 py-2 my-0.5">
+                    <div className="text-[9px] sm:text-[11px] text-muted-foreground space-y-0.5 border-t border-b border-border/40 py-1.5 my-0.5">
                         <div className="flex items-center gap-1.5">
                             <span className="text-green-600 font-extrabold">✓ FREE Delivery</span>
                             <span>on orders over ৳ 2,000</span>
@@ -347,36 +347,36 @@ export function ProductView({ product, reviewStats }: ProductViewProps) {
                     </div>
 
                     {/* Qty & Checkout Buttons */}
-                    <div className="space-y-2.5 md:space-y-3">
+                    <div className="space-y-2 md:space-y-3">
                         {!isOutOfStock && (
                             <div className="flex items-center justify-between">
-                                <span className="text-[10px] font-black uppercase tracking-wider text-muted-foreground">Quantity:</span>
-                                <div className="flex items-center border border-border rounded-full h-8 px-2.5 bg-background shadow-xs">
+                                <span className="text-[9px] font-black uppercase tracking-wider text-muted-foreground">Quantity:</span>
+                                <div className="flex items-center border border-border rounded-full h-7 sm:h-8 px-2 sm:px-2.5 bg-background shadow-xs">
                                     <button
                                         onClick={() => setQty(Math.max(1, qty - 1))}
                                         className="text-muted-foreground hover:text-foreground transition-colors p-1"
                                         disabled={isOutOfStock}
                                     >
-                                        <Minus className="w-3 h-3" />
+                                        <Minus className="w-2.5 h-2.5" />
                                     </button>
-                                    <span className="text-foreground font-black px-3.5 text-xs">{qty}</span>
+                                    <span className="text-foreground font-black px-2.5 text-[11px] sm:text-xs">{qty}</span>
                                     <button
                                         onClick={() => setQty(activeVariation && activeVariation.stock !== undefined ? Math.min(Number(activeVariation.stock), qty + 1) : qty + 1)}
                                         className="text-muted-foreground hover:text-foreground transition-colors p-1"
                                         disabled={isOutOfStock}
                                     >
-                                        <Plus className="w-3 h-3" />
+                                        <Plus className="w-2.5 h-2.5" />
                                     </button>
                                 </div>
                             </div>
                         )}
 
-                        <div className="flex flex-col gap-2">
+                        <div className="flex flex-col gap-1.5">
                             <Button
                                 onClick={handleAddToCart}
                                 disabled={isOutOfStock}
                                 className={cn(
-                                    "w-full h-10 font-extrabold uppercase tracking-widest rounded-full transition-all duration-300 hover:scale-[1.01] shadow-xs text-[10px]",
+                                    "w-full h-9 sm:h-10 font-extrabold uppercase tracking-widest rounded-full transition-all duration-300 hover:scale-[1.01] shadow-xs text-[9px] sm:text-[10px]",
                                     isOutOfStock 
                                         ? "bg-muted text-muted-foreground border border-border cursor-not-allowed" 
                                         : "bg-[#AC8717] hover:bg-[#967412] text-white border border-[#AC8717]/10"
@@ -389,7 +389,7 @@ export function ProductView({ product, reviewStats }: ProductViewProps) {
                             {!isOutOfStock && (
                                 <Button
                                     onClick={handleBuyNow}
-                                    className="w-full h-10 bg-[#AC8717] hover:bg-[#967412] text-white font-extrabold uppercase tracking-widest rounded-full transition-all duration-300 hover:scale-[1.01] shadow-xs text-[10px]"
+                                    className="w-full h-9 sm:h-10 bg-[#AC8717] hover:bg-[#967412] text-white font-extrabold uppercase tracking-widest rounded-full transition-all duration-300 hover:scale-[1.01] shadow-xs text-[9px] sm:text-[10px]"
                                 >
                                     ⚡ Buy Now
                                 </Button>
@@ -416,15 +416,15 @@ export function ProductView({ product, reviewStats }: ProductViewProps) {
 
                 {/* Specifications Table */}
                 {product.attributes && product.attributes.length > 0 && (
-                    <div className="border-t border-border/40 pt-4 mt-2">
-                        <h3 className="text-[10px] uppercase font-bold tracking-widest text-muted-foreground mb-2">Product Specifications</h3>
+                    <div className="border-t border-border/40 pt-3 mt-1.5">
+                        <h3 className="text-[9px] sm:text-[10px] uppercase font-bold tracking-widest text-muted-foreground mb-1.5">Product Specifications</h3>
                         <div className="bg-muted/10 rounded-xl border border-border/40 overflow-hidden">
-                            <table className="w-full text-xs text-left">
+                            <table className="w-full text-[10px] sm:text-xs text-left">
                                 <tbody>
                                     {product.attributes.map((attr: any, idx: number) => (
                                         <tr key={idx} className={cn("border-b border-border/30 last:border-0", idx % 2 === 0 ? "bg-muted/5" : "bg-transparent")}>
-                                            <td className="px-3 py-2 font-semibold text-muted-foreground w-1/3 border-r border-border/30">{attr.key}</td>
-                                            <td className="px-3 py-2 text-foreground font-medium">{attr.value}</td>
+                                            <td className="px-2 py-1.5 sm:px-3 sm:py-2 font-semibold text-muted-foreground w-1/3 border-r border-border/30">{attr.key}</td>
+                                            <td className="px-2 py-1.5 sm:px-3 sm:py-2 text-foreground font-medium">{attr.value}</td>
                                         </tr>
                                     ))}
                                 </tbody>

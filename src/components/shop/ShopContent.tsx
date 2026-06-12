@@ -36,7 +36,7 @@ export function ShopContent({ initialFilters = {} }: { initialFilters?: { catego
  return (
  <div className="w-full bg-background min-h-screen text-foreground pb-20 sm:pb-8 overflow-x-hidden">
  {/* Header */}
- <div className="container mx-auto px-4 pt-0.5 md:pt-8 pb-0 sm:pb-3 text-left">
+ <div className="container mx-auto px-5 sm:px-6 md:px-8 pt-0.5 md:pt-8 pb-0 sm:pb-3 text-left">
    <div className="flex flex-col sm:flex-row sm:items-baseline sm:justify-between border-b border-border/40 px-0 pb-1 sm:pb-3 mb-1 sm:mb-4 gap-0.5 sm:gap-2">
      <div>
        <h1 className="text-[14px] md:text-2xl font-bold tracking-wide text-foreground uppercase leading-tight">
@@ -266,7 +266,7 @@ export function ShopContent({ initialFilters = {} }: { initialFilters?: { catego
  </div>
 
  {/* Grid */}
- <div className="w-full px-4 sm:container sm:mx-auto sm:px-4 md:px-6">
+ <div className="w-full px-5 sm:container sm:mx-auto sm:px-6 md:px-8">
  {isLoading ? (
  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-1 sm:gap-3 md:gap-6">
  {Array.from({ length: 8 }).map((_, i) => (

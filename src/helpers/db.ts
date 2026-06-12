@@ -31,7 +31,9 @@ async function dbConnect() {
 
     if (!cached.promise) {
         const opts = {
-            bufferCommands: false,
+            bufferCommands: true,
+            serverSelectionTimeoutMS: 5000,
+            connectTimeoutMS: 5000,
         };
 
         console.time("[DB Telemetry] First Connect Handshake");

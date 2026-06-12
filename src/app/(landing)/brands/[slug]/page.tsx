@@ -128,18 +128,28 @@ export default async function BrandPage({ params }: BrandPageProps) {
                 </nav>
 
                 {/* Premium Brand SEO Intro Section with Golden Accents */}
-                <header className="relative mb-12 rounded-[2rem] overflow-hidden bg-gradient-to-br from-[#120f0a] via-[#090806] to-[#1a150e] border border-white/5 py-16 px-8 md:px-16 text-center text-white shadow-2xl">
+                <header className="relative mb-6 md:mb-12 rounded-xl md:rounded-[2rem] overflow-hidden bg-gradient-to-br from-[#120f0a] via-[#090806] to-[#1a150e] border border-white/5 py-8 px-4 md:py-16 md:px-16 text-center text-white shadow-2xl">
                     <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(212,175,55,0.1),transparent_70%)] pointer-events-none" />
                     
-                    <h1 className="text-4xl md:text-6xl font-heading font-medium text-[#d4af37] tracking-wider mb-6 leading-tight drop-shadow-md">
+                    <h1 className="text-2xl md:text-6xl font-heading font-medium text-[#d4af37] tracking-wider mb-3 md:mb-6 leading-tight drop-shadow-md">
                         {brand.name}
                     </h1>
                     
-                    <p className="max-w-3xl mx-auto text-white/80 text-sm md:text-base font-light leading-relaxed mb-4">
+                    <p className="hidden md:block max-w-3xl mx-auto text-white/80 text-sm md:text-base font-light leading-relaxed mb-4">
                         {brand.description || `Discover the exclusive olfactory universe of ${brand.name}. Expert craftsmanship, premium raw materials, and exceptional longevity.`}
                     </p>
+
+                    <details className="group md:hidden max-w-xl mx-auto bg-white/5 border border-white/10 rounded-lg p-2.5 mt-2 transition-all open:bg-white/10">
+                        <summary className="flex items-center justify-between text-[10px] font-bold text-[#d4af37] cursor-pointer uppercase tracking-widest select-none list-none [&::-webkit-details-marker]:hidden">
+                            <span>Read Brand Description</span>
+                            <span className="text-[8px] transition-transform duration-300 group-open:rotate-180">▼</span>
+                        </summary>
+                        <p className="text-white/70 text-xs font-light leading-relaxed mt-2 text-left border-t border-white/5 pt-2">
+                            {brand.description || `Discover the exclusive olfactory universe of ${brand.name}. Expert craftsmanship, premium raw materials, and exceptional longevity.`}
+                        </p>
+                    </details>
                     
-                    <div className="w-16 h-[2px] bg-[#d4af37]/60 mx-auto mt-6 rounded-full" />
+                    <div className="w-12 h-[2px] bg-[#d4af37]/60 mx-auto mt-4 md:mt-6 rounded-full" />
                 </header>
 
                 <ShopContent initialFilters={{ brand: brand.slug, title: brand.name }} />

@@ -58,6 +58,7 @@ export async function ProductReviewsContainer({
 
   // Recalculate stats for combined reviews
   const totalReviews = allReviews.length;
+
   const avgRating = totalReviews > 0 
     ? allReviews.reduce((acc: number, curr: any) => acc + curr.rating, 0) / totalReviews 
     : 0;

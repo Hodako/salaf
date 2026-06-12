@@ -24,7 +24,7 @@ function StarRating({ rating }: { rating: number }) {
                     fill={i < rating ? 'currentColor' : 'none'}
                     stroke={i < rating ? 'currentColor' : 'none'}
                     strokeWidth={1.5}
-                    className={`w-5 h-5 shrink-0 ${i < rating ? 'text-bprimary-dark' : 'text-muted-foreground/20'}`}
+                    className={`w-4 h-4 md:w-5 md:h-5 shrink-0 ${i < rating ? 'text-bprimary-dark' : 'text-muted-foreground/20'}`}
                 >
                     <path
                         strokeLinecap="round"
@@ -95,14 +95,14 @@ export default function TestimonialsCarouselClient({ reviews }: Props) {
     const review = reviews[current];
 
     return (
-        <section className="w-full bg-[#f5f5f5] py-10 px-6 overflow-hidden">
+        <section className="w-full bg-[#f5f5f5] py-3.5 md:py-8 px-4 overflow-hidden">
             <div className="max-w-4xl mx-auto">
                 {/* Section heading */}
-                <div className="text-center mb-6">
-                    <p className="text-xs text-bprimary-dark tracking-[0.3em] uppercase font-heading mb-3">
+                <div className="text-center mb-3">
+                    <p className="text-[9px] md:text-[10px] text-bprimary-dark tracking-[0.3em] uppercase font-heading mb-1">
                         What They Say
                     </p>
-                    <h2 className="text-3xl md:text-5xl font-heading font-bold text-foreground">
+                    <h2 className="text-lg md:text-2xl font-heading font-bold text-foreground">
                         Our Customers Say
                     </h2>
                 </div>
@@ -117,7 +117,7 @@ export default function TestimonialsCarouselClient({ reviews }: Props) {
                     <button
                         onClick={goPrev}
                         aria-label="Previous testimonial"
-                        className="shrink-0 w-10 h-10 md:w-12 md:h-12 rounded-full border border-border bg-muted hover:border-bprimary-dark hover:bg-bprimary/10 text-muted-foreground hover:text-bprimary-dark flex items-center justify-center transition-all duration-300"
+                        className="shrink-0 w-8 h-8 md:w-12 md:h-12 rounded-full border border-border bg-muted hover:border-bprimary-dark hover:bg-bprimary/10 text-muted-foreground hover:text-bprimary-dark flex items-center justify-center transition-all duration-300"
                     >
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4">
                             <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
@@ -130,20 +130,20 @@ export default function TestimonialsCarouselClient({ reviews }: Props) {
                         style={{ opacity: animating ? 0 : 1 }}
                     >
                         {/* Large decorative quote */}
-                        <span className="text-6xl font-heading text-bprimary-dark/20 leading-none select-none block -mb-6">
+                        <span className="text-4xl md:text-6xl font-heading text-bprimary-dark/20 leading-none select-none block -mb-4 md:-mb-6">
                             &ldquo;
                         </span>
 
                         {/* Fixed-height content container for consistency */}
-                        <div className="h-[180px] md:h-[220px] flex items-center justify-center mb-6">
-                            <p className="text-lg md:text-xl text-muted-foreground font-light leading-relaxed italic line-clamp-6 overflow-hidden">
+                        <div className="min-h-[85px] md:h-[160px] flex items-center justify-center mb-2.5 sm:mb-4">
+                            <p className="text-xs md:text-base text-muted-foreground font-light leading-relaxed italic line-clamp-6 overflow-hidden">
                                 {review.content}
                             </p>
                         </div>
 
                         <StarRating rating={review.rating} />
 
-                        <p className="mt-4 text-sm font-bold text-foreground uppercase tracking-widest font-heading">
+                        <p className="mt-3 md:mt-4 text-xs md:text-sm font-bold text-foreground uppercase tracking-widest font-heading">
                             — {review.reviewerName}
                         </p>
                     </div>
@@ -152,7 +152,7 @@ export default function TestimonialsCarouselClient({ reviews }: Props) {
                     <button
                         onClick={goNext}
                         aria-label="Next testimonial"
-                        className="shrink-0 w-10 h-10 md:w-12 md:h-12 rounded-full border border-border bg-muted hover:border-bprimary-dark hover:bg-bprimary/10 text-muted-foreground hover:text-bprimary-dark flex items-center justify-center transition-all duration-300"
+                        className="shrink-0 w-8 h-8 md:w-12 md:h-12 rounded-full border border-border bg-muted hover:border-bprimary-dark hover:bg-bprimary/10 text-muted-foreground hover:text-bprimary-dark flex items-center justify-center transition-all duration-300"
                     >
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4">
                             <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
@@ -161,7 +161,7 @@ export default function TestimonialsCarouselClient({ reviews }: Props) {
                 </div>
 
                 {/* Dot indicators */}
-                <div className="flex items-center justify-center gap-2 mt-10">
+                <div className="flex items-center justify-center gap-2 mt-5 md:mt-10">
                     {reviews.map((_, i) => (
                         <button
                             key={i}
